@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToursIndexRouteImport } from './routes/tours.index'
+import { Route as ToursTourIdRouteImport } from './routes/tours.$tourId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const ToursIndexRoute = ToursIndexRouteImport.update({
   path: '/tours/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToursTourIdRoute = ToursTourIdRouteImport.update({
+  id: '/tours/$tourId',
+  path: '/tours/$tourId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
   '/tours/': typeof ToursIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
   '/tours': typeof ToursIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
   '/tours/': typeof ToursIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tours/'
+  fullPaths: '/' | '/tours/$tourId' | '/tours/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tours'
-  id: '__root__' | '/' | '/tours/'
+  to: '/' | '/tours/$tourId' | '/tours'
+  id: '__root__' | '/' | '/tours/$tourId' | '/tours/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ToursTourIdRoute: typeof ToursTourIdRoute
   ToursIndexRoute: typeof ToursIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToursIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tours/$tourId': {
+      id: '/tours/$tourId'
+      path: '/tours/$tourId'
+      fullPath: '/tours/$tourId'
+      preLoaderRoute: typeof ToursTourIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ToursTourIdRoute: ToursTourIdRoute,
   ToursIndexRoute: ToursIndexRoute,
 }
 export const routeTree = rootRouteImport
