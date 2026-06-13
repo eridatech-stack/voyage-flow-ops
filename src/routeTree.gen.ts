@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as AccountingRouteImport } from './routes/accounting'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as ToursTourIdRouteImport } from './routes/tours.$tourId'
 import { Route as TransfersScheduleScheduleIdRouteImport } from './routes/transfers.schedule.$scheduleId'
 import { Route as ToursScheduleScheduleIdRouteImport } from './routes/tours.schedule.$scheduleId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FleetRoute = FleetRouteImport.update({
   id: '/fleet',
   path: '/fleet',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours/': typeof ToursIndexRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours': typeof ToursIndexRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours/': typeof ToursIndexRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accounting'
     | '/fleet'
+    | '/settings'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accounting'
     | '/fleet'
+    | '/settings'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accounting'
     | '/fleet'
+    | '/settings'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours/'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountingRoute: typeof AccountingRoute
   FleetRoute: typeof FleetRoute
+  SettingsRoute: typeof SettingsRoute
   ToursTourIdRoute: typeof ToursTourIdRoute
   TransfersTransferIdRoute: typeof TransfersTransferIdRoute
   ToursIndexRoute: typeof ToursIndexRoute
@@ -150,6 +163,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fleet': {
       id: '/fleet'
       path: '/fleet'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountingRoute: AccountingRoute,
   FleetRoute: FleetRoute,
+  SettingsRoute: SettingsRoute,
   ToursTourIdRoute: ToursTourIdRoute,
   TransfersTransferIdRoute: TransfersTransferIdRoute,
   ToursIndexRoute: ToursIndexRoute,
