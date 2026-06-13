@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TransfersIndexRouteImport } from './routes/transfers.index'
 import { Route as ToursIndexRouteImport } from './routes/tours.index'
@@ -17,6 +18,11 @@ import { Route as ToursTourIdRouteImport } from './routes/tours.$tourId'
 import { Route as TransfersScheduleScheduleIdRouteImport } from './routes/transfers.schedule.$scheduleId'
 import { Route as ToursScheduleScheduleIdRouteImport } from './routes/tours.schedule.$scheduleId'
 
+const FleetRoute = FleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -56,6 +62,7 @@ const ToursScheduleScheduleIdRoute = ToursScheduleScheduleIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/fleet': typeof FleetRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours/': typeof ToursIndexRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fleet': typeof FleetRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours': typeof ToursIndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/fleet': typeof FleetRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
   '/tours/': typeof ToursIndexRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/fleet'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours/'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/fleet'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/fleet'
     | '/tours/$tourId'
     | '/transfers/$transferId'
     | '/tours/'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FleetRoute: typeof FleetRoute
   ToursTourIdRoute: typeof ToursTourIdRoute
   TransfersTransferIdRoute: typeof TransfersTransferIdRoute
   ToursIndexRoute: typeof ToursIndexRoute
@@ -124,6 +137,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/fleet': {
+      id: '/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof FleetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FleetRoute: FleetRoute,
   ToursTourIdRoute: ToursTourIdRoute,
   TransfersTransferIdRoute: TransfersTransferIdRoute,
   ToursIndexRoute: ToursIndexRoute,
