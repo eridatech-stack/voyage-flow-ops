@@ -9,38 +9,181 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as FleetRouteImport } from './routes/fleet'
+import { Route as AccountingRouteImport } from './routes/accounting'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TransfersIndexRouteImport } from './routes/transfers.index'
+import { Route as ToursIndexRouteImport } from './routes/tours.index'
+import { Route as TransfersTransferIdRouteImport } from './routes/transfers.$transferId'
+import { Route as ToursTourIdRouteImport } from './routes/tours.$tourId'
+import { Route as TransfersScheduleScheduleIdRouteImport } from './routes/transfers.schedule.$scheduleId'
+import { Route as ToursScheduleScheduleIdRouteImport } from './routes/tours.schedule.$scheduleId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FleetRoute = FleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountingRoute = AccountingRouteImport.update({
+  id: '/accounting',
+  path: '/accounting',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransfersIndexRoute = TransfersIndexRouteImport.update({
+  id: '/transfers/',
+  path: '/transfers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToursIndexRoute = ToursIndexRouteImport.update({
+  id: '/tours/',
+  path: '/tours/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransfersTransferIdRoute = TransfersTransferIdRouteImport.update({
+  id: '/transfers/$transferId',
+  path: '/transfers/$transferId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToursTourIdRoute = ToursTourIdRouteImport.update({
+  id: '/tours/$tourId',
+  path: '/tours/$tourId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransfersScheduleScheduleIdRoute =
+  TransfersScheduleScheduleIdRouteImport.update({
+    id: '/transfers/schedule/$scheduleId',
+    path: '/transfers/schedule/$scheduleId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ToursScheduleScheduleIdRoute = ToursScheduleScheduleIdRouteImport.update({
+  id: '/tours/schedule/$scheduleId',
+  path: '/tours/schedule/$scheduleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accounting': typeof AccountingRoute
+  '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
+  '/transfers/$transferId': typeof TransfersTransferIdRoute
+  '/tours/': typeof ToursIndexRoute
+  '/transfers/': typeof TransfersIndexRoute
+  '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
+  '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accounting': typeof AccountingRoute
+  '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
+  '/transfers/$transferId': typeof TransfersTransferIdRoute
+  '/tours': typeof ToursIndexRoute
+  '/transfers': typeof TransfersIndexRoute
+  '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
+  '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/accounting': typeof AccountingRoute
+  '/fleet': typeof FleetRoute
+  '/settings': typeof SettingsRoute
+  '/tours/$tourId': typeof ToursTourIdRoute
+  '/transfers/$transferId': typeof TransfersTransferIdRoute
+  '/tours/': typeof ToursIndexRoute
+  '/transfers/': typeof TransfersIndexRoute
+  '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
+  '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accounting'
+    | '/fleet'
+    | '/settings'
+    | '/tours/$tourId'
+    | '/transfers/$transferId'
+    | '/tours/'
+    | '/transfers/'
+    | '/tours/schedule/$scheduleId'
+    | '/transfers/schedule/$scheduleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/accounting'
+    | '/fleet'
+    | '/settings'
+    | '/tours/$tourId'
+    | '/transfers/$transferId'
+    | '/tours'
+    | '/transfers'
+    | '/tours/schedule/$scheduleId'
+    | '/transfers/schedule/$scheduleId'
+  id:
+    | '__root__'
+    | '/'
+    | '/accounting'
+    | '/fleet'
+    | '/settings'
+    | '/tours/$tourId'
+    | '/transfers/$transferId'
+    | '/tours/'
+    | '/transfers/'
+    | '/tours/schedule/$scheduleId'
+    | '/transfers/schedule/$scheduleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountingRoute: typeof AccountingRoute
+  FleetRoute: typeof FleetRoute
+  SettingsRoute: typeof SettingsRoute
+  ToursTourIdRoute: typeof ToursTourIdRoute
+  TransfersTransferIdRoute: typeof TransfersTransferIdRoute
+  ToursIndexRoute: typeof ToursIndexRoute
+  TransfersIndexRoute: typeof TransfersIndexRoute
+  ToursScheduleScheduleIdRoute: typeof ToursScheduleScheduleIdRoute
+  TransfersScheduleScheduleIdRoute: typeof TransfersScheduleScheduleIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fleet': {
+      id: '/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof FleetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accounting': {
+      id: '/accounting'
+      path: '/accounting'
+      fullPath: '/accounting'
+      preLoaderRoute: typeof AccountingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +191,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/transfers/': {
+      id: '/transfers/'
+      path: '/transfers'
+      fullPath: '/transfers/'
+      preLoaderRoute: typeof TransfersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tours/': {
+      id: '/tours/'
+      path: '/tours'
+      fullPath: '/tours/'
+      preLoaderRoute: typeof ToursIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transfers/$transferId': {
+      id: '/transfers/$transferId'
+      path: '/transfers/$transferId'
+      fullPath: '/transfers/$transferId'
+      preLoaderRoute: typeof TransfersTransferIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tours/$tourId': {
+      id: '/tours/$tourId'
+      path: '/tours/$tourId'
+      fullPath: '/tours/$tourId'
+      preLoaderRoute: typeof ToursTourIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transfers/schedule/$scheduleId': {
+      id: '/transfers/schedule/$scheduleId'
+      path: '/transfers/schedule/$scheduleId'
+      fullPath: '/transfers/schedule/$scheduleId'
+      preLoaderRoute: typeof TransfersScheduleScheduleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tours/schedule/$scheduleId': {
+      id: '/tours/schedule/$scheduleId'
+      path: '/tours/schedule/$scheduleId'
+      fullPath: '/tours/schedule/$scheduleId'
+      preLoaderRoute: typeof ToursScheduleScheduleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountingRoute: AccountingRoute,
+  FleetRoute: FleetRoute,
+  SettingsRoute: SettingsRoute,
+  ToursTourIdRoute: ToursTourIdRoute,
+  TransfersTransferIdRoute: TransfersTransferIdRoute,
+  ToursIndexRoute: ToursIndexRoute,
+  TransfersIndexRoute: TransfersIndexRoute,
+  ToursScheduleScheduleIdRoute: ToursScheduleScheduleIdRoute,
+  TransfersScheduleScheduleIdRoute: TransfersScheduleScheduleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
