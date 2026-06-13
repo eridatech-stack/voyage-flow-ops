@@ -364,16 +364,26 @@ function Info({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function EmailDialog({ customer, serviceName, schedule, onClose }: { customer: Customer | null; serviceName: string; schedule: Schedule; onClose: () => void }) {
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const defaultSubject = customer ? `Your booking confirmation: ${serviceName}` : "";
+  const defaultBody = customer
+    ? `Dear ${customer.fullName},\n\nThank you for booking ${serviceName} with InTravelSync.\n\nDate: ${schedule.date}\nTime: ${schedule.time}\nBooking Reference: ${customer.bookingRef}\n\nWe look forward to welcoming you.\n\nBest regards,\nInTravelSync Team`
+    : "";
+  const [subject, setSubject] = useState(defaultSubject);
+  const [body, setBody] = useState(defaultBody);
 
-  if (customer && !subject) {
-    setSubject(`Your booking confirmation: ${serviceName}`);
-    setBody(`Dear ${customer.fullName},\n\nThank you for booking ${serviceName} with InTravelSync.\n\nDate: ${schedule.date}\nTime: ${schedule.time}\nBooking Reference: ${customer.bookingRef}\n\nWe look forward to welcoming you.\n\nBest regards,\nInTravelSync Team`);
+  // Reset when customer changes
+  const lastIdRef = (EmailDialog as any)._lastId ?? { current: null };
+  (EmailDialog as any)._lastId = lastIdRef;
+  if (customer && lastIdRef.current !== customer.id) {
+    lastIdRef.current = customer.id;
+    queueMicrotask(() => {
+      setSubject(`Your booking confirmation: ${serviceName}`);
+      setBody(`Dear ${customer.fullName},\n\nThank you for booking ${serviceName} with InTravelSync.\n\nDate: ${schedule.date}\nTime: ${schedule.time}\nBooking Reference: ${customer.bookingRef}\n\nWe look forward to welcoming you.\n\nBest regards,\nInTravelSync Team`);
+    });
   }
 
   return (
-    <Dialog open={!!customer} onOpenChange={(o) => { if (!o) { onClose(); setSubject(""); setBody(""); } }}>
+    <Dialog open={!!customer} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Send Email</DialogTitle>
@@ -386,8 +396,8 @@ function EmailDialog({ customer, serviceName, schedule, onClose }: { customer: C
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={() => { onClose(); setSubject(""); setBody(""); }}>Cancel</Button>
-          <Button onClick={() => { toast.success("Email sent"); onClose(); setSubject(""); setBody(""); }}>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => { toast.success("Email sent"); onClose(); }}>
             <Send className="h-3.5 w-3.5" /> Send
           </Button>
         </DialogFooter>
