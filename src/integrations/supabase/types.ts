@@ -14,66 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      agency_settings: {
-        Row: {
-          id: string
-          agency_name: string
-          contact_email: string
-          support_phone: string | null
-          address: string | null
-          website: string | null
-          currency: string
-          timezone: string
-          voucher_footer: string | null
-          voucher_show_qr: boolean
-          voucher_auto_email: boolean
-          voucher_signature_line: boolean
-          email_from_name: string | null
-          email_reply_to: string | null
-          resend_api_key: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          agency_name?: string
-          contact_email?: string
-          support_phone?: string | null
-          address?: string | null
-          website?: string | null
-          currency?: string
-          timezone?: string
-          voucher_footer?: string | null
-          voucher_show_qr?: boolean
-          voucher_auto_email?: boolean
-          voucher_signature_line?: boolean
-          email_from_name?: string | null
-          email_reply_to?: string | null
-          resend_api_key?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          agency_name?: string
-          contact_email?: string
-          support_phone?: string | null
-          address?: string | null
-          website?: string | null
-          currency?: string
-          timezone?: string
-          voucher_footer?: string | null
-          voucher_show_qr?: boolean
-          voucher_auto_email?: boolean
-          voucher_signature_line?: boolean
-          email_from_name?: string | null
-          email_reply_to?: string | null
-          resend_api_key?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       accounting_entries: {
         Row: {
           amount: number
