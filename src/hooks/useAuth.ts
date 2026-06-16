@@ -1,32 +1,42 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 
-// ── Get current session ─────────────────────────────────────────────────────
+// ── Get current session — uses real-time auth state listener ────────────────
 export function useAuth() {
-  return useQuery({
-    queryKey: ["auth_session"],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getSession();
-      return data.session?.user ?? null;
-    },
-    staleTime: 1000 * 60 * 5, // 5 min
-  });
+  const [user, setUser] = useState<User | null | undefined>(undefined); // undefined = loading
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    // Subscribe to auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return {
+    user,
+    isLoading: user === undefined,
+  };
 }
 
 // ── Sign in with email + password ───────────────────────────────────────────
 export function useSignIn() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       return data.user;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["auth_session"] });
-    },
+    // onAuthStateChange in useAuth will handle the state update automatically
     onError: (e: Error) => toast.error(e.message),
   });
 }
@@ -40,8 +50,7 @@ export function useSignOut() {
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["auth_session"] });
-      qc.clear(); // clear all cached data on logout
+      qc.clear(); // clear all cached query data on logout
       toast.success("Signed out");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -58,12 +67,4 @@ export function useChangePassword() {
     onSuccess: () => toast.success("Password changed"),
     onError: (e: Error) => toast.error(e.message),
   });
-}
-
-// ── Listen to auth state changes (call once at root) ────────────────────────
-export function subscribeToAuthChanges(onUpdate: (user: User | null) => void) {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    onUpdate(session?.user ?? null);
-  });
-  return () => subscription.unsubscribe();
 }

@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Loader2, Eye, EyeOff, MapPin } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useSignIn } from "@/hooks/useAuth";
 
-export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
+// No onSuccess prop needed — useAuth's onAuthStateChange listener
+// automatically picks up the new session and re-renders AuthGate
+export function LoginPage() {
   const signIn = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,10 +18,13 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!email || !password) { setError("Email and password are required."); return; }
+    if (!email || !password) {
+      setError("Email and password are required.");
+      return;
+    }
     try {
       await signIn.mutateAsync({ email, password });
-      onSuccess();
+      // No reload needed — onAuthStateChange fires and AuthGate re-renders
     } catch (err: any) {
       setError(err?.message ?? "Invalid credentials. Please try again.");
     }
@@ -41,7 +46,9 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
 
         <Card className="p-6">
           <h2 className="font-display text-lg font-semibold">Sign in</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Enter your operator credentials to continue.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enter your operator credentials to continue.
+          </p>
 
           <form onSubmit={submit} className="mt-5 space-y-4">
             <div className="space-y-1.5">
@@ -53,6 +60,7 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 autoFocus
+                disabled={signIn.isPending}
               />
             </div>
             <div className="space-y-1.5">
@@ -65,6 +73,7 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
                   className="pr-10"
+                  disabled={signIn.isPending}
                 />
                 <button
                   type="button"
@@ -84,7 +93,10 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
             )}
 
             <Button type="submit" className="w-full" disabled={signIn.isPending}>
-              {signIn.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+              {signIn.isPending
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in…</>
+                : "Sign in"
+              }
             </Button>
           </form>
         </Card>
