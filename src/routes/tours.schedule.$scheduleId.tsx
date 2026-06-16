@@ -17,6 +17,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useScheduledTour } from "@/hooks/useSchedules";
+import { useSendEmail, buildTourConfirmationEmail } from "@/hooks/useEmail";
+import { useSettings } from "@/hooks/useSettings";
+
 import {
   useTourBookings,
   useAddTourBooking,
@@ -486,15 +489,30 @@ function EmailDialog({ booking, tourName, schedule, onClose }: {
   schedule: { service_date: string; departure_time: string | null };
   onClose: () => void;
 }) {
+  const sendEmail = useSendEmail();
+  const { data: settings } = useSettings();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
 
   if (booking && !subject) {
-    setSubject(`Your booking confirmation: ${tourName}`);
-    setBody(
-      `Dear ${booking.customer.full_name},\n\nThank you for booking ${tourName} with InTravelSync.\n\nDate: ${schedule.service_date}\nTime: ${schedule.departure_time ?? "TBD"}\nBooking Reference: ${booking.customer.booking_reference ?? "—"}\nSeats: ${booking.seat_count}\n\nWe look forward to welcoming you!\n\nBest regards,\nInTravelSync Team`
-    );
+    const tpl = buildTourConfirmationEmail({
+      customerName: booking.customer.full_name,
+      tourName,
+      serviceDate: schedule.service_date,
+      departureTime: schedule.departure_time,
+      bookingRef: booking.customer.booking_reference,
+      seatCount: booking.seat_count,
+      agencyName: settings?.agency_name ?? "InTravelSync",
+    });
+    setSubject(tpl.subject);
+    setBody(tpl.body);
   }
+
+  const handleSend = async () => {
+    if (!booking?.customer.email) { toast.error("Customer has no email address"); return; }
+    await sendEmail.mutateAsync({ to: booking.customer.email, subject, body });
+    onClose(); setSubject(""); setBody("");
+  };
 
   return (
     <Dialog open={!!booking} onOpenChange={(o) => { if (!o) { onClose(); setSubject(""); setBody(""); } }}>
@@ -502,15 +520,23 @@ function EmailDialog({ booking, tourName, schedule, onClose }: {
         <DialogHeader><DialogTitle>Send Email</DialogTitle></DialogHeader>
         {booking && (
           <div className="space-y-3">
-            <F label="To"><Input value={booking.customer.email ?? ""} disabled /></F>
+            <F label="To">
+              <Input value={booking.customer.email ?? "No email on file"} disabled className={!booking.customer.email ? "text-destructive" : ""} />
+            </F>
             <F label="Subject"><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></F>
             <F label="Message"><Textarea rows={10} value={body} onChange={(e) => setBody(e.target.value)} /></F>
+            {!settings?.resend_api_key && (
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-2 text-xs text-muted-foreground">
+                ⚠️ No email API key configured. Add your Resend API key in <strong>Settings → Email Configuration</strong>.
+              </div>
+            )}
           </div>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => { onClose(); setSubject(""); setBody(""); }}>Cancel</Button>
-          <Button onClick={() => { toast.success("Email sent"); onClose(); setSubject(""); setBody(""); }}>
-            <Send className="h-3.5 w-3.5" /> Send
+          <Button onClick={handleSend} disabled={sendEmail.isPending || !booking?.customer.email}>
+            {sendEmail.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Send
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -16,6 +16,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useSendEmail, buildTransferConfirmationEmail } from "@/hooks/useEmail";
+import { useSettings } from "@/hooks/useSettings";
 import { useScheduledTransfer } from "@/hooks/useSchedules";
 import {
   useTransferBookings,
@@ -416,18 +418,36 @@ function VoucherDialog({ booking, transferName, schedule, onClose }: {
 function EmailDialog({ booking, transferName, schedule, onClose }: {
   booking: TransferBooking | null;
   transferName: string;
-  schedule: { service_date: string; pickup_time: string | null; pickup_location: string | null };
+  schedule: { service_date: string; pickup_time: string | null; pickup_location: string | null; dropoff_location: string | null };
   onClose: () => void;
 }) {
+  const sendEmail = useSendEmail();
+  const { data: settings } = useSettings();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
 
   if (booking && !subject) {
-    setSubject(`Your transfer confirmation: ${transferName}`);
-    setBody(
-      `Dear ${booking.customer.full_name},\n\nThank you for booking your transfer with InTravelSync.\n\nRoute: ${transferName}\nDate: ${schedule.service_date}\nPickup Time: ${schedule.pickup_time ?? "TBD"}\nPickup Location: ${schedule.pickup_location ?? "TBD"}\nPassengers: ${booking.passenger_count}\nLuggage: ${booking.luggage_count} pieces${booking.flight_number ? `\nFlight: ${booking.flight_number}` : ""}\nBooking Reference: ${booking.customer.booking_reference ?? "—"}\n\nYour driver will be waiting for you.\n\nBest regards,\nInTravelSync Team`
-    );
+    const tpl = buildTransferConfirmationEmail({
+      customerName: booking.customer.full_name,
+      transferName,
+      serviceDate: schedule.service_date,
+      pickupTime: schedule.pickup_time,
+      pickupLocation: schedule.pickup_location,
+      dropoffLocation: schedule.dropoff_location,
+      bookingRef: booking.customer.booking_reference,
+      passengerCount: booking.passenger_count,
+      flightNumber: booking.flight_number,
+      agencyName: settings?.agency_name ?? "InTravelSync",
+    });
+    setSubject(tpl.subject);
+    setBody(tpl.body);
   }
+
+  const handleSend = async () => {
+    if (!booking?.customer.email) { toast.error("Customer has no email address"); return; }
+    await sendEmail.mutateAsync({ to: booking.customer.email, subject, body });
+    onClose(); setSubject(""); setBody("");
+  };
 
   return (
     <Dialog open={!!booking} onOpenChange={(o) => { if (!o) { onClose(); setSubject(""); setBody(""); } }}>
@@ -435,15 +455,23 @@ function EmailDialog({ booking, transferName, schedule, onClose }: {
         <DialogHeader><DialogTitle>Send Email</DialogTitle></DialogHeader>
         {booking && (
           <div className="space-y-3">
-            <F label="To"><Input value={booking.customer.email ?? ""} disabled /></F>
+            <F label="To">
+              <Input value={booking.customer.email ?? "No email on file"} disabled className={!booking.customer.email ? "text-destructive" : ""} />
+            </F>
             <F label="Subject"><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></F>
             <F label="Message"><Textarea rows={10} value={body} onChange={(e) => setBody(e.target.value)} /></F>
+            {!settings?.resend_api_key && (
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-2 text-xs text-muted-foreground">
+                ⚠️ No email API key configured. Add your Resend API key in <strong>Settings → Email Configuration</strong>.
+              </div>
+            )}
           </div>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => { onClose(); setSubject(""); setBody(""); }}>Cancel</Button>
-          <Button onClick={() => { toast.success("Email sent"); onClose(); setSubject(""); setBody(""); }}>
-            <Send className="h-3.5 w-3.5" /> Send
+          <Button onClick={handleSend} disabled={sendEmail.isPending || !booking?.customer.email}>
+            {sendEmail.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Send
           </Button>
         </DialogFooter>
       </DialogContent>
