@@ -77,7 +77,8 @@ function TourScheduleDetail() {
             <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {schedule.service_date}</span>
               {schedule.departure_time && <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {schedule.departure_time}</span>}
-              {schedule.guide_name && <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {schedule.guide_name}</span>}
+              {schedule.guide_name && <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Guide: {schedule.guide_name}</span>}
+              {schedule.driver && <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Driver: {schedule.driver.full_name}</span>}
               {schedule.vehicle && <span className="inline-flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> {schedule.vehicle.name}</span>}
               <StatusBadge status={schedule.status} />
             </div>

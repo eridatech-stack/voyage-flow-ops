@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, Plus, Calendar, Loader2, Edit, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Plus, Calendar, Loader2, Edit, Trash2, User } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
   useDeleteScheduledTour,
   type ScheduledTour,
 } from "@/hooks/useSchedules";
-import { useVehicles } from "@/hooks/useFleet";
+import { useVehicles, useDrivers, type Vehicle, type Driver } from "@/hooks/useFleet";
 
 export const Route = createFileRoute("/tours/$tourId")({
   component: TourSchedules,
@@ -30,13 +30,8 @@ function TourSchedules() {
   const { data: tour, isLoading: tourLoading } = useTour(tourId);
   const { data: schedules = [], isLoading: schedulesLoading } = useScheduledTours(tourId);
 
-  if (tourLoading) {
-    return <div className="flex items-center justify-center p-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  }
-
-  if (!tour) {
-    return <div className="p-8">Tour not found. <Link to="/tours" className="text-amber underline">Back</Link></div>;
-  }
+  if (tourLoading) return <div className="flex items-center justify-center p-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (!tour) return <div className="p-8">Tour not found. <Link to="/tours" className="text-amber underline">Back</Link></div>;
 
   return (
     <div>
@@ -48,8 +43,7 @@ function TourSchedules() {
           <div>
             <h1 className="font-display text-2xl font-semibold">{tour.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {[tour.duration, tour.destination, tour.base_price ? `from $${tour.base_price}` : null]
-                .filter(Boolean).join(" · ")}
+              {[tour.duration, tour.destination, tour.base_price ? `from $${tour.base_price}` : null].filter(Boolean).join(" · ")}
             </p>
           </div>
           <NewScheduleDrawer tourId={tourId} />
@@ -59,9 +53,7 @@ function TourSchedules() {
       <div className="p-8">
         <Card className="overflow-hidden p-0">
           {schedulesLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+            <div className="flex items-center justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : schedules.length === 0 ? (
             <EmptyState
               title="No schedules yet"
@@ -76,6 +68,7 @@ function TourSchedules() {
                   <TableHead>Date</TableHead>
                   <TableHead>Time</TableHead>
                   <TableHead>Guide</TableHead>
+                  <TableHead>Driver</TableHead>
                   <TableHead>Vehicle</TableHead>
                   <TableHead>Customers</TableHead>
                   <TableHead>Status</TableHead>
@@ -87,7 +80,8 @@ function TourSchedules() {
                   <TableRow key={s.id}>
                     <TableCell className="font-medium">{s.service_date}</TableCell>
                     <TableCell>{s.departure_time ?? "—"}</TableCell>
-                    <TableCell>{s.guide_name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
+                    <TableCell>{s.guide_name ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell>{s.driver?.full_name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                     <TableCell>{s.vehicle?.name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                     <TableCell>{s.booking_count ?? 0} / {s.max_capacity}</TableCell>
                     <TableCell><StatusBadge status={s.status} /></TableCell>
@@ -111,21 +105,62 @@ function TourSchedules() {
   );
 }
 
+// ── Shared driver auto-fill logic ───────────────────────────────────────────
+// When a vehicle is selected:
+// - If the vehicle has an assigned driver → auto-fill driver, lock it
+// - If not → let user pick from available drivers
+
+function useDriverAutoFill(
+  vehicles: Vehicle[],
+  drivers: Driver[],
+  vehicleId: string,
+  setDriverId: (id: string) => void,
+) {
+  const [driverLocked, setDriverLocked] = useState(false);
+
+  useEffect(() => {
+    if (!vehicleId) {
+      setDriverLocked(false);
+      return;
+    }
+    const assignedDriver = drivers.find((d) => d.vehicle_id === vehicleId);
+    if (assignedDriver) {
+      setDriverId(assignedDriver.id);
+      setDriverLocked(true);
+    } else {
+      setDriverLocked(false);
+    }
+  }, [vehicleId, drivers]);
+
+  return { driverLocked };
+}
+
 // ── New Schedule Drawer ─────────────────────────────────────────────────────
 
 function NewScheduleDrawer({ tourId }: { tourId: string }) {
   const createSchedule = useCreateScheduledTour();
   const { data: vehicles = [] } = useVehicles();
+  const { data: drivers = [] } = useDrivers();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     service_date: new Date().toISOString().slice(0, 10),
     departure_time: "09:00",
     guide_name: "",
     vehicle_id: "",
+    driver_id: "",
     max_capacity: "16",
     status: "confirmed" as "confirmed" | "pending" | "cancelled",
     notes: "",
   });
+
+  const { driverLocked } = useDriverAutoFill(
+    vehicles, drivers, form.vehicle_id,
+    (id) => setForm((f) => ({ ...f, driver_id: id }))
+  );
+
+  const handleVehicleChange = (vehicleId: string) => {
+    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "" }));
+  };
 
   const submit = async () => {
     await createSchedule.mutateAsync({
@@ -134,13 +169,16 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
       departure_time: form.departure_time || null,
       guide_name: form.guide_name || null,
       vehicle_id: form.vehicle_id || null,
+      driver_id: form.driver_id || null,
       max_capacity: Number(form.max_capacity) || 1,
       status: form.status,
       notes: form.notes || null,
     });
     setOpen(false);
-    setForm({ ...form, guide_name: "", notes: "", vehicle_id: "" });
+    setForm({ service_date: new Date().toISOString().slice(0, 10), departure_time: "09:00", guide_name: "", vehicle_id: "", driver_id: "", max_capacity: "16", status: "confirmed", notes: "" });
   };
+
+  const selectedVehicle = vehicles.find((v) => v.id === form.vehicle_id);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -154,20 +192,65 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
             <F label="Date"><Input type="date" value={form.service_date} onChange={(e) => setForm({ ...form, service_date: e.target.value })} /></F>
             <F label="Departure Time"><Input type="time" value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })} /></F>
           </div>
+
           <F label="Guide Name">
             <Input placeholder="Guide's full name" value={form.guide_name} onChange={(e) => setForm({ ...form, guide_name: e.target.value })} />
           </F>
+
           <F label="Vehicle">
-            <Select value={form.vehicle_id} onValueChange={(v) => setForm({ ...form, vehicle_id: v })}>
+            <Select value={form.vehicle_id} onValueChange={handleVehicleChange}>
               <SelectTrigger><SelectValue placeholder="Choose vehicle" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="">None</SelectItem>
-                {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.capacity} seats</SelectItem>)}
+                {vehicles.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name} · {v.capacity} seats
+                    {drivers.find((d) => d.vehicle_id === v.id) ? " 🧑‍✈️" : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </F>
+
+          <F label="Driver">
+            {driverLocked ? (
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-sm">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="flex-1">{drivers.find((d) => d.id === form.driver_id)?.full_name}</span>
+                <span className="text-xs text-amber font-medium">Auto-assigned from vehicle</span>
+              </div>
+            ) : (
+              <Select
+                value={form.driver_id}
+                onValueChange={(v) => setForm({ ...form, driver_id: v })}
+                disabled={!form.vehicle_id === false && driverLocked}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={form.vehicle_id ? "Choose driver" : "Select vehicle first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {drivers
+                    .filter((d) => d.status !== "on_trip" || d.id === form.driver_id)
+                    .map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.full_name}
+                        {d.status === "off_duty" ? " (off duty)" : ""}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            )}
+          </F>
+
           <div className="grid grid-cols-2 gap-3">
-            <F label="Max Capacity"><Input type="number" min={1} value={form.max_capacity} onChange={(e) => setForm({ ...form, max_capacity: e.target.value })} /></F>
+            <F label="Max Capacity">
+              <Input type="number" min={1}
+                value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
+                onChange={(e) => setForm({ ...form, max_capacity: e.target.value })}
+                placeholder={selectedVehicle ? `Vehicle max: ${selectedVehicle.capacity}` : ""}
+              />
+            </F>
             <F label="Status">
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "confirmed" | "pending" | "cancelled" })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -179,6 +262,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
               </Select>
             </F>
           </div>
+
           <F label="Notes"><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
         </div>
         <SheetFooter>
@@ -193,19 +277,32 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
   );
 }
 
+// ── Edit Schedule Drawer ────────────────────────────────────────────────────
+
 function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
   const updateSchedule = useUpdateScheduledTour();
   const { data: vehicles = [] } = useVehicles();
+  const { data: drivers = [] } = useDrivers();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     service_date: schedule.service_date,
     departure_time: schedule.departure_time ?? "",
     guide_name: schedule.guide_name ?? "",
     vehicle_id: schedule.vehicle_id ?? "",
+    driver_id: schedule.driver_id ?? "",
     max_capacity: String(schedule.max_capacity),
     status: schedule.status,
     notes: schedule.notes ?? "",
   });
+
+  const { driverLocked } = useDriverAutoFill(
+    vehicles, drivers, form.vehicle_id,
+    (id) => setForm((f) => ({ ...f, driver_id: id }))
+  );
+
+  const handleVehicleChange = (vehicleId: string) => {
+    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "" }));
+  };
 
   const submit = async () => {
     await updateSchedule.mutateAsync({
@@ -214,12 +311,15 @@ function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
       departure_time: form.departure_time || null,
       guide_name: form.guide_name || null,
       vehicle_id: form.vehicle_id || null,
+      driver_id: form.driver_id || null,
       max_capacity: Number(form.max_capacity) || 1,
       status: form.status,
       notes: form.notes || null,
     });
     setOpen(false);
   };
+
+  const selectedVehicle = vehicles.find((v) => v.id === form.vehicle_id);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -233,20 +333,60 @@ function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
             <F label="Date"><Input type="date" value={form.service_date} onChange={(e) => setForm({ ...form, service_date: e.target.value })} /></F>
             <F label="Time"><Input type="time" value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })} /></F>
           </div>
+
           <F label="Guide Name">
             <Input value={form.guide_name} onChange={(e) => setForm({ ...form, guide_name: e.target.value })} />
           </F>
+
           <F label="Vehicle">
-            <Select value={form.vehicle_id} onValueChange={(v) => setForm({ ...form, vehicle_id: v })}>
+            <Select value={form.vehicle_id} onValueChange={handleVehicleChange}>
               <SelectTrigger><SelectValue placeholder="Choose vehicle" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="">None</SelectItem>
-                {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.capacity} seats</SelectItem>)}
+                {vehicles.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name} · {v.capacity} seats
+                    {drivers.find((d) => d.vehicle_id === v.id) ? " 🧑‍✈️" : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </F>
+
+          <F label="Driver">
+            {driverLocked ? (
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-sm">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="flex-1">{drivers.find((d) => d.id === form.driver_id)?.full_name}</span>
+                <span className="text-xs text-amber font-medium">Auto-assigned from vehicle</span>
+              </div>
+            ) : (
+              <Select value={form.driver_id} onValueChange={(v) => setForm({ ...form, driver_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose driver" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {drivers
+                    .filter((d) => d.status !== "on_trip" || d.id === form.driver_id)
+                    .map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.full_name}
+                        {d.status === "off_duty" ? " (off duty)" : ""}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            )}
+          </F>
+
           <div className="grid grid-cols-2 gap-3">
-            <F label="Capacity"><Input type="number" min={1} value={form.max_capacity} onChange={(e) => setForm({ ...form, max_capacity: e.target.value })} /></F>
+            <F label="Capacity">
+              <Input type="number" min={1}
+                value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
+                onChange={(e) => setForm({ ...form, max_capacity: e.target.value })}
+              />
+            </F>
             <F label="Status">
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "confirmed" | "pending" | "cancelled" })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -258,6 +398,7 @@ function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
               </Select>
             </F>
           </div>
+
           <F label="Notes"><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
         </div>
         <SheetFooter>
@@ -275,7 +416,7 @@ function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
 function DeleteScheduleButton({ id }: { id: string }) {
   const del = useDeleteScheduledTour();
   return (
-    <Button size="sm" variant="ghost" onClick={() => del.mutate(id)} disabled={del.isPending} title="Delete schedule">
+    <Button size="sm" variant="ghost" onClick={() => del.mutate(id)} disabled={del.isPending} title="Delete">
       {del.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 text-destructive" />}
     </Button>
   );

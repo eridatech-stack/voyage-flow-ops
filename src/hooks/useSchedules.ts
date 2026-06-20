@@ -11,6 +11,7 @@ export interface ScheduledTour {
   departure_time: string | null;
   guide_name: string | null;
   vehicle_id: string | null;
+  driver_id: string | null;
   max_capacity: number;
   status: "confirmed" | "pending" | "cancelled";
   notes: string | null;
@@ -18,6 +19,7 @@ export interface ScheduledTour {
   // joined
   tour?: { name: string; destination: string | null; duration: string | null };
   vehicle?: { name: string; plate_number: string } | null;
+  driver?: { full_name: string } | null;
   booking_count?: number;
 }
 
@@ -40,7 +42,7 @@ export interface ScheduledTransfer {
   booking_count?: number;
 }
 
-export type ScheduledTourInsert = Omit<ScheduledTour, "id" | "created_at" | "tour" | "vehicle" | "booking_count">;
+export type ScheduledTourInsert = Omit<ScheduledTour, "id" | "created_at" | "tour" | "vehicle" | "driver" | "booking_count">;
 export type ScheduledTourUpdate = Partial<ScheduledTourInsert>;
 
 export type ScheduledTransferInsert = Omit<ScheduledTransfer, "id" | "created_at" | "transfer" | "driver" | "vehicle" | "booking_count">;
@@ -58,6 +60,7 @@ export function useScheduledTours(tourId?: string) {
           *,
           tour:tours(name, destination, duration),
           vehicle:vehicles(name, plate_number),
+          driver:drivers(full_name),
           tour_bookings(id)
         `)
         .order("service_date", { ascending: true });
@@ -85,7 +88,8 @@ export function useScheduledTour(id: string) {
         .select(`
           *,
           tour:tours(name, destination, duration),
-          vehicle:vehicles(name, plate_number)
+          vehicle:vehicles(name, plate_number),
+          driver:drivers(full_name)
         `)
         .eq("id", id)
         .single();
