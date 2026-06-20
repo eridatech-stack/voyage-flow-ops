@@ -250,7 +250,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
                     {v.name} · {v.capacity} seats
-                    {drivers.find((d) => d.vehicle_id === v.id) ? " 🧑‍✈️" : ""}
+                    {drivers.find((d) => d.vehicle_id === v.id) ? " 🧑\u200d✈️" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -282,6 +282,8 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
               </Select>
             )}
           </F>
+
+          <div className="grid grid-cols-2 gap-3">
             <F label="Max Capacity">
               <Input type="number" min={1}
                 value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
