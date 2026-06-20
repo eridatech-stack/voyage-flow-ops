@@ -21,6 +21,7 @@ export interface ScheduledTour {
   vehicle?: { name: string; plate_number: string } | null;
   driver?: { full_name: string } | null;
   booking_count?: number;
+  total_seats?: number; // sum of seat_count across all bookings
 }
 
 export interface ScheduledTransfer {
@@ -61,7 +62,7 @@ export function useScheduledTours(tourId?: string) {
           tour:tours(name, destination, duration),
           vehicle:vehicles(name, plate_number),
           driver:drivers(full_name),
-          tour_bookings(id)
+          tour_bookings(id, seat_count)
         `)
         .order("service_date", { ascending: true });
 
@@ -73,6 +74,7 @@ export function useScheduledTours(tourId?: string) {
       return (data ?? []).map((row: any) => ({
         ...row,
         booking_count: row.tour_bookings?.length ?? 0,
+        total_seats: (row.tour_bookings ?? []).reduce((sum: number, b: any) => sum + (b.seat_count ?? 1), 0),
         tour_bookings: undefined,
       })) as ScheduledTour[];
     },

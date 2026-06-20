@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Calendar, Loader2, Edit, Trash2, User } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, Loader2, Edit, Trash2, User, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -83,14 +83,29 @@ function TourSchedules() {
                     <TableCell>{s.guide_name ?? <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell>{s.driver?.full_name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                     <TableCell>{s.vehicle?.name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
-                    <TableCell>{s.booking_count ?? 0} / {s.max_capacity}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <span>{s.total_seats ?? 0} / {s.max_capacity}</span>
+                        {s.vehicle && (s.total_seats ?? 0) > s.vehicle_id ? null : null}
+                        {(() => {
+                          const seats = s.total_seats ?? 0;
+                          const cap = s.max_capacity;
+                          if (seats === 0) return null;
+                          if (seats > cap)
+                            return <span title={`${seats} booked seats exceed max capacity of ${cap}`}><AlertTriangle className="h-3.5 w-3.5 text-destructive" /></span>;
+                          if (cap - seats <= 2)
+                            return <span title={`Only ${cap - seats} seat(s) remaining`}><AlertTriangle className="h-3.5 w-3.5 text-amber" /></span>;
+                          return null;
+                        })()}
+                      </div>
+                    </TableCell>
                     <TableCell><StatusBadge status={s.status} /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button asChild size="sm" variant="outline">
                           <Link to="/tours/schedule/$scheduleId" params={{ scheduleId: s.id }}>Open</Link>
                         </Button>
-                        <EditScheduleDrawer schedule={s} />
+                        <EditScheduleDrawer schedule={s} totalSeats={s.total_seats ?? 0} />
                         <DeleteScheduleButton id={s.id} />
                       </div>
                     </TableCell>
@@ -105,7 +120,37 @@ function TourSchedules() {
   );
 }
 
-// ── Shared driver auto-fill logic ───────────────────────────────────────────
+// ── Capacity warning banner ─────────────────────────────────────────────────
+
+function CapacityWarning({ totalSeats, vehicleCapacity, vehicleName }: {
+  totalSeats: number;
+  vehicleCapacity: number;
+  vehicleName: string;
+}) {
+  if (totalSeats === 0) return null;
+
+  const over = totalSeats > vehicleCapacity;
+  const tight = !over && vehicleCapacity - totalSeats <= 2;
+
+  if (!over && !tight) return null;
+
+  return (
+    <div className={`flex items-start gap-2 rounded-md border px-3 py-2.5 text-xs ${
+      over
+        ? "border-destructive/40 bg-destructive/10 text-destructive"
+        : "border-amber/40 bg-amber/10 text-amber-700"
+    }`}>
+      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+      <div>
+        {over ? (
+          <><strong>Vehicle too small.</strong> {vehicleName} holds <strong>{vehicleCapacity} seats</strong> but this schedule has <strong>{totalSeats} booked seats</strong> across all customers. Choose a larger vehicle.</>
+        ) : (
+          <><strong>Almost full.</strong> {vehicleName} holds {vehicleCapacity} seats and {totalSeats} are already booked — only <strong>{vehicleCapacity - totalSeats} seat{vehicleCapacity - totalSeats === 1 ? "" : "s"} remaining</strong>.</>
+        )}
+      </div>
+    </div>
+  );
+}
 // When a vehicle is selected:
 // - If the vehicle has an assigned driver → auto-fill driver, lock it
 // - If not → let user pick from available drivers
@@ -220,11 +265,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
                 <span className="text-xs text-amber font-medium">Auto-assigned from vehicle</span>
               </div>
             ) : (
-              <Select
-                value={form.driver_id}
-                onValueChange={(v) => setForm({ ...form, driver_id: v })}
-                disabled={!form.vehicle_id === false && driverLocked}
-              >
+              <Select value={form.driver_id} onValueChange={(v) => setForm({ ...form, driver_id: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder={form.vehicle_id ? "Choose driver" : "Select vehicle first"} />
                 </SelectTrigger>
@@ -234,16 +275,13 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
                     .filter((d) => d.status !== "on_trip" || d.id === form.driver_id)
                     .map((d) => (
                       <SelectItem key={d.id} value={d.id}>
-                        {d.full_name}
-                        {d.status === "off_duty" ? " (off duty)" : ""}
+                        {d.full_name}{d.status === "off_duty" ? " (off duty)" : ""}
                       </SelectItem>
                     ))}
                 </SelectContent>
               </Select>
             )}
           </F>
-
-          <div className="grid grid-cols-2 gap-3">
             <F label="Max Capacity">
               <Input type="number" min={1}
                 value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
@@ -279,7 +317,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
 
 // ── Edit Schedule Drawer ────────────────────────────────────────────────────
 
-function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
+function EditScheduleDrawer({ schedule, totalSeats }: { schedule: ScheduledTour; totalSeats: number }) {
   const updateSchedule = useUpdateScheduledTour();
   const { data: vehicles = [] } = useVehicles();
   const { data: drivers = [] } = useDrivers();
@@ -352,6 +390,15 @@ function EditScheduleDrawer({ schedule }: { schedule: ScheduledTour }) {
               </SelectContent>
             </Select>
           </F>
+
+          {selectedVehicle && (
+            <CapacityWarning
+              totalSeats={totalSeats}
+              vehicleCapacity={selectedVehicle.capacity}
+              vehicleName={selectedVehicle.name}
+            />
+          )}
+
 
           <F label="Driver">
             {driverLocked ? (
