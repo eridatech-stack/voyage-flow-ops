@@ -20,7 +20,7 @@ function Dashboard() {
   const { data: allSchedules = [], isLoading } = useAllSchedules();
   const { data: recentEntries = [] } = useAccountingEntries();
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDateStr(new Date());
   const todaysTours = allSchedules.filter((s) => s.kind === "tour" && s.date === todayStr);
   const todaysTransfers = allSchedules.filter((s) => s.kind === "transfer" && s.date === todayStr);
 
@@ -149,13 +149,21 @@ function startOfWeek(d: Date) {
   return x;
 }
 
+// Use local date string (YYYY-MM-DD) to avoid UTC offset shifting the date
+function localDateStr(d: Date) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function MonthGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEvent[] }) {
   const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
   const start = startOfWeek(first);
   const days: Date[] = Array.from({ length: 42 }, (_, i) => {
     const d = new Date(start); d.setDate(start.getDate() + i); return d;
   });
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDateStr(new Date());
 
   return (
     <div>
@@ -166,7 +174,7 @@ function MonthGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEve
       </div>
       <div className="grid grid-cols-7 grid-rows-6">
         {days.map((d, i) => {
-          const ds = d.toISOString().slice(0, 10);
+          const ds = localDateStr(d);
           const inMonth = d.getMonth() === cursor.getMonth();
           const events = schedules.filter((s) => s.date === ds);
           return (
@@ -206,7 +214,7 @@ function WeekGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEven
   return (
     <div className="grid grid-cols-7">
       {days.map((d, i) => {
-        const ds = d.toISOString().slice(0, 10);
+        const ds = localDateStr(d);
         const events = schedules.filter((s) => s.date === ds);
         return (
           <div key={i} className="min-h-[280px] border-r border-border p-2">
@@ -239,7 +247,7 @@ function WeekGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEven
 }
 
 function DayList({ cursor, schedules }: { cursor: Date; schedules: CalendarEvent[] }) {
-  const ds = cursor.toISOString().slice(0, 10);
+  const ds = localDateStr(cursor);
   const events = schedules.filter((s) => s.date === ds).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
   return (
     <div className="divide-y divide-border">
