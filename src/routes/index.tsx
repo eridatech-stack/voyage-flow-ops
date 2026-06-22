@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllSchedules, type CalendarEvent } from "@/hooks/useSchedules";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useAccountingEntries } from "@/hooks/useAccounting";
 
 export const Route = createFileRoute("/")({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
+  const { format } = useCurrency();
   const { data: allSchedules = [], isLoading } = useAllSchedules();
   const { data: recentEntries = [] } = useAccountingEntries();
 
@@ -329,7 +331,7 @@ function RecentActivity({ entries }: { entries: any[] }) {
                 <div className="font-medium">{t.customer?.full_name ?? "—"}</div>
                 <div className="text-xs text-muted-foreground capitalize">{t.service_type} · {t.payment_method ?? "—"}</div>
               </div>
-              <div className="font-medium">${t.amount}</div>
+              <div className="font-medium">{format(t.amount)}</div>
               <StatusBadge status={t.status} />
             </div>
           ))}

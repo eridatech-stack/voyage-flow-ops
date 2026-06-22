@@ -20,6 +20,7 @@ import {
   type ScheduledTour,
 } from "@/hooks/useSchedules";
 import { useVehicles, useDrivers, type Vehicle, type Driver } from "@/hooks/useFleet";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export const Route = createFileRoute("/tours/$tourId")({
   component: TourSchedules,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/tours/$tourId")({
 function TourSchedules() {
   const { tourId } = Route.useParams();
   const { data: tour, isLoading: tourLoading } = useTour(tourId);
+  const { format } = useCurrency();
   const { data: schedules = [], isLoading: schedulesLoading } = useScheduledTours(tourId);
 
   if (tourLoading) return <div className="flex items-center justify-center p-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -43,7 +45,7 @@ function TourSchedules() {
           <div>
             <h1 className="font-display text-2xl font-semibold">{tour.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {[tour.duration, tour.destination, tour.base_price ? `from $${tour.base_price}` : null].filter(Boolean).join(" · ")}
+              {[tour.duration, tour.destination, tour.base_price ? `from ${format(tour.base_price)}` : null].filter(Boolean).join(" · ")}
             </p>
           </div>
           <NewScheduleDrawer tourId={tourId} />

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTransfers, useCreateTransfer, useUpdateTransfer, useArchiveTransfer } from "@/hooks/useTransfers";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useScheduledTransfers } from "@/hooks/useSchedules";
 import type { Transfer } from "@/hooks/useTransfers";
 
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/transfers/")({
 
 function TransfersIndex() {
   const { data: transfers = [], isLoading } = useTransfers();
+  const { format } = useCurrency();
   const { data: allSchedules = [] } = useScheduledTransfers();
   const [search, setSearch] = useState("");
 
@@ -80,7 +82,7 @@ function TransfersIndex() {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-3 w-3" /> from ${t.base_price}
+                      <DollarSign className="h-3 w-3" /> from {format(t.base_price)}
                     </div>
                   </div>
                   <div className="mt-5 flex gap-2 border-t border-border pt-4">

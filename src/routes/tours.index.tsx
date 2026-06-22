@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTours, useCreateTour, useUpdateTour, useArchiveTour } from "@/hooks/useTours";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useScheduledTours } from "@/hooks/useSchedules";
 
 export const Route = createFileRoute("/tours/")({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/tours/")({
 
 function ToursIndex() {
   const { data: tours = [], isLoading } = useTours();
+  const { format } = useCurrency();
   const { data: allSchedules = [] } = useScheduledTours();
   const [search, setSearch] = useState("");
 
@@ -70,7 +72,7 @@ function ToursIndex() {
                   <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
                     {t.destination && <div className="flex items-center gap-2"><MapPin className="h-3 w-3" /> {t.destination}</div>}
                     {t.duration && <div className="flex items-center gap-2"><Clock className="h-3 w-3" /> {t.duration}</div>}
-                    <div className="flex items-center gap-2"><DollarSign className="h-3 w-3" /> from ${t.base_price}</div>
+                    <div className="flex items-center gap-2"><DollarSign className="h-3 w-3" /> from {format(t.base_price)}</div>
                   </div>
                   <div className="mt-5 flex gap-2 border-t border-border pt-4">
                     <Button asChild size="sm" className="flex-1">

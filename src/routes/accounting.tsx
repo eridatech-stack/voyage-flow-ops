@@ -13,6 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAccountingEntries, useAccountingSummary, useCreateAccountingEntry } from "@/hooks/useAccounting";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export const Route = createFileRoute("/accounting")({
   component: Accounting,
@@ -24,6 +25,7 @@ function Accounting() {
   const [status, setStatus] = useState("all");
   const [serviceType, setServiceType] = useState("all");
 
+  const { format, code: currencyCode } = useCurrency();
   const { data: entries = [], isLoading } = useAccountingEntries({ from, to, status, service_type: serviceType });
   const { data: summary } = useAccountingSummary();
 
@@ -59,13 +61,13 @@ function Accounting() {
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
             label="Total Revenue"
-            value={`$${(summary?.totalRevenue ?? 0).toLocaleString()}`}
+            value={format(summary?.totalRevenue ?? 0)}
             icon={<TrendingUp className="h-4 w-4" />}
             tone="confirmed"
           />
           <StatCard
             label="Unpaid Bookings"
-            value={`$${(summary?.unpaidAmount ?? 0).toLocaleString()}`}
+            value={format(summary?.unpaidAmount ?? 0)}
             icon={<AlertCircle className="h-4 w-4" />}
             tone="pending"
           />
@@ -128,7 +130,7 @@ function Accounting() {
                     <TableCell className="text-sm">{e.entry_date}</TableCell>
                     <TableCell className="capitalize">{e.service_type}</TableCell>
                     <TableCell>{e.customer?.full_name ?? "—"}</TableCell>
-                    <TableCell className="font-medium">${e.amount.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{format(e.amount)}</TableCell>
                     <TableCell>{e.payment_method ?? "—"}</TableCell>
                     <TableCell><StatusBadge status={e.status} /></TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{e.notes ?? "—"}</TableCell>
@@ -193,7 +195,7 @@ function AddEntryDrawer() {
             </F>
             <F label="Date"><Input type="date" value={form.entry_date} onChange={(e) => setForm({ ...form, entry_date: e.target.value })} /></F>
           </div>
-          <F label="Amount (USD) *"><Input type="number" min={0} step={0.01} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></F>
+          <F label={`Amount (${currencyCode}) *`}><Input type="number" min={0} step={0.01} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></F>
           <div className="grid grid-cols-2 gap-3">
             <F label="Payment Method">
               <Select value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>

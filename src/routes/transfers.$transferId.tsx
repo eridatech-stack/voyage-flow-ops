@@ -12,6 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTransfer } from "@/hooks/useTransfers";
+import { useCurrency } from "@/hooks/useCurrency";
 import {
   useScheduledTransfers,
   useCreateScheduledTransfer,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/transfers/$transferId")({
 function TransferSchedules() {
   const { transferId } = Route.useParams();
   const { data: transfer, isLoading: transferLoading } = useTransfer(transferId);
+  const { format } = useCurrency();
   const { data: schedules = [], isLoading: schedulesLoading } = useScheduledTransfers(transferId);
 
   if (transferLoading) {
@@ -47,7 +49,7 @@ function TransferSchedules() {
             <h1 className="font-display text-2xl font-semibold">{transfer.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {[transfer.origin, transfer.destination].filter(Boolean).join(" → ")}
-              {transfer.base_price ? ` · from $${transfer.base_price}` : ""}
+              {transfer.base_price ? ` · from ${format(transfer.base_price)}` : ""}
             </p>
           </div>
           <NewScheduleDrawer transferId={transferId} />
