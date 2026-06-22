@@ -267,3 +267,54 @@ export function useRemoveTripBooking() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+// ── Update trip booking + customer ─────────────────────────────────────────
+
+export interface UpdateTripBookingInput {
+  bookingId: string;
+  tripId: string;
+  customerId: string;
+  customerUpdate?: {
+    full_name?: string;
+    email?: string | null;
+    phone?: string | null;
+    booking_reference?: string | null;
+    special_requests?: string | null;
+    payment_status?: "paid" | "pending" | "refunded";
+  };
+  bookingUpdate?: {
+    passenger_count?: number;
+    luggage_count?: number;
+    flight_number?: string | null;
+    flight_time?: string | null;
+    amount?: number | null;
+    notes?: string | null;
+  };
+}
+
+export function useUpdateTripBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ bookingId, tripId, customerId, customerUpdate, bookingUpdate }: UpdateTripBookingInput) => {
+      if (customerUpdate) {
+        const { error } = await supabase
+          .from("customers")
+          .update(customerUpdate)
+          .eq("id", customerId);
+        if (error) throw error;
+      }
+      if (bookingUpdate) {
+        const { error } = await supabase
+          .from("trip_bookings")
+          .update(bookingUpdate)
+          .eq("id", bookingId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["trip_bookings", vars.tripId] });
+      toast.success("Customer updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}

@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   useTrip, useTripBookings, useAddTripBooking,
   useRemoveTripBooking, useGenerateTripVoucher,
-  useUpdateTrip, type TripBooking,
+  useUpdateTrip, useUpdateTripBooking, type TripBooking,
 } from "@/hooks/useTrips";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSendEmail } from "@/hooks/useEmail";
@@ -178,6 +178,7 @@ function TripDetail() {
                         <Button size="sm" variant="ghost" title="Send email" onClick={() => setEmailFor(b)}>
                           <Mail className="h-3.5 w-3.5" />
                         </Button>
+                        <EditBookingDrawer booking={b} tripId={tripId} />
                         <RemoveBookingBtn bookingId={b.id} tripId={tripId} />
                       </div>
                     </TableCell>
@@ -321,6 +322,127 @@ function AddCustomerDrawer({ tripId }: { tripId: string }) {
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={submit} disabled={add.isPending}>
             {add.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Add Customer
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// ── Edit Booking Drawer ─────────────────────────────────────────────────────
+
+function EditBookingDrawer({ booking, tripId }: { booking: TripBooking; tripId: string }) {
+  const update = useUpdateTripBooking();
+  const { format } = useCurrency();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    full_name: booking.customer.full_name,
+    email: booking.customer.email ?? "",
+    phone: booking.customer.phone ?? "",
+    booking_reference: booking.customer.booking_reference ?? "",
+    special_requests: booking.customer.special_requests ?? "",
+    payment_status: booking.customer.payment_status,
+    passenger_count: String(booking.passenger_count),
+    luggage_count: String(booking.luggage_count),
+    flight_number: booking.flight_number ?? "",
+    flight_time: booking.flight_time ?? "",
+    amount: booking.amount != null ? String(booking.amount) : "",
+    notes: booking.notes ?? "",
+  });
+
+  const submit = async () => {
+    if (!form.full_name) return;
+    await update.mutateAsync({
+      bookingId: booking.id,
+      tripId,
+      customerId: booking.customer_id,
+      customerUpdate: {
+        full_name: form.full_name,
+        email: form.email || null,
+        phone: form.phone || null,
+        booking_reference: form.booking_reference || null,
+        special_requests: form.special_requests || null,
+        payment_status: form.payment_status,
+      },
+      bookingUpdate: {
+        passenger_count: Number(form.passenger_count) || 1,
+        luggage_count: Number(form.luggage_count) || 0,
+        flight_number: form.flight_number || null,
+        flight_time: form.flight_time || null,
+        amount: form.amount ? Number(form.amount) : null,
+        notes: form.notes || null,
+      },
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button size="sm" variant="ghost" title="Edit customer">
+          <Edit className="h-3.5 w-3.5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader><SheetTitle>Edit Customer</SheetTitle></SheetHeader>
+        <div className="space-y-4 px-4 py-4">
+          <F label="Full Name *">
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+          </F>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Email">
+              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </F>
+            <F label="Phone">
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </F>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Passengers">
+              <Input type="number" min={1} value={form.passenger_count} onChange={(e) => setForm({ ...form, passenger_count: e.target.value })} />
+            </F>
+            <F label="Luggage pieces">
+              <Input type="number" min={0} value={form.luggage_count} onChange={(e) => setForm({ ...form, luggage_count: e.target.value })} />
+            </F>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Flight Number">
+              <Input placeholder="e.g. U6 302" value={form.flight_number} onChange={(e) => setForm({ ...form, flight_number: e.target.value })} />
+            </F>
+            <F label="Flight Time">
+              <Input placeholder="e.g. 14:30" value={form.flight_time} onChange={(e) => setForm({ ...form, flight_time: e.target.value })} />
+            </F>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Booking Reference">
+              <Input value={form.booking_reference} onChange={(e) => setForm({ ...form, booking_reference: e.target.value })} />
+            </F>
+            <F label="Amount">
+              <Input type="number" min={0} step={0.01} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+            </F>
+          </div>
+          <F label="Special Requests">
+            <Textarea rows={2} value={form.special_requests} onChange={(e) => setForm({ ...form, special_requests: e.target.value })} />
+          </F>
+          <F label="Notes">
+            <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </F>
+          <F label="Payment Status">
+            <Select value={form.payment_status} onValueChange={(v) => setForm({ ...form, payment_status: v as "paid" | "pending" | "refunded" })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </F>
+        </div>
+        <SheetFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={submit} disabled={!form.full_name || update.isPending}>
+            {update.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Save Changes
           </Button>
         </SheetFooter>
       </SheetContent>
