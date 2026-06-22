@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import {
   Plus, Edit, Trash2, Loader2, Route, Calendar,
   Clock, MapPin, Car, User, Users, ChevronRight,
@@ -17,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTrips, useCreateTrip, useUpdateTrip, useDeleteTrip, type Trip } from "@/hooks/useTrips";
 import { useVehicles, useDrivers } from "@/hooks/useFleet";
 import { useCurrency } from "@/hooks/useCurrency";
-import { useState as useDriverState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/trips/")({
   component: TripsIndex,

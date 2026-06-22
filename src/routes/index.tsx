@@ -191,7 +191,7 @@ function MonthGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEve
                   <Link
                     key={e.id}
                     to={e.kind === "tour" ? "/tours/schedule/$scheduleId" : e.kind === "trip" ? "/trips/$tripId" : "/transfers/schedule/$scheduleId"}
-                    params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id }}
+                    params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id } as any}
                     className={`block truncate rounded px-1.5 py-0.5 text-[10px] font-medium hover:opacity-80 ${
                       e.kind === "tour" ? "bg-amber/15 text-amber" : e.kind === "trip" ? "bg-purple-500/15 text-purple-600" : "bg-status-progress/15 text-status-progress"
                     }`}
@@ -231,7 +231,7 @@ function WeekGrid({ cursor, schedules }: { cursor: Date; schedules: CalendarEven
                 <Link
                   key={e.id}
                   to={e.kind === "tour" ? "/tours/schedule/$scheduleId" : e.kind === "trip" ? "/trips/$tripId" : "/transfers/schedule/$scheduleId"}
-                  params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id }}
+                  params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id } as any}
                   className={`block rounded p-2 text-[11px] hover:opacity-80 ${
                     e.kind === "tour"
                       ? "bg-amber/15 text-amber border-l-2 border-amber"
@@ -261,7 +261,7 @@ function DayList({ cursor, schedules }: { cursor: Date; schedules: CalendarEvent
         <Link
           key={e.id}
           to={e.kind === "tour" ? "/tours/schedule/$scheduleId" : e.kind === "trip" ? "/trips/$tripId" : "/transfers/schedule/$scheduleId"}
-          params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id }}
+          params={e.kind === "trip" ? { tripId: e.id } : { scheduleId: e.id } as any}
           className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors"
         >
           <div className="w-16 text-sm font-medium">{e.time ?? "—"}</div>
@@ -298,7 +298,7 @@ function TodaysActivity({ schedules, todayStr }: { schedules: CalendarEvent[]; t
           <Link
             key={s.id}
             to={s.kind === "tour" ? "/tours/schedule/$scheduleId" : s.kind === "trip" ? "/trips/$tripId" : "/transfers/schedule/$scheduleId"}
-            params={s.kind === "trip" ? { tripId: s.id } : { scheduleId: s.id }}
+            params={s.kind === "trip" ? { tripId: s.id } : { scheduleId: s.id } as any}
             className="flex items-start gap-3 p-4 hover:bg-muted/40 transition-colors"
           >
             <div className="w-12 shrink-0 text-sm font-semibold">{s.time ?? "—"}</div>
