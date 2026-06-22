@@ -148,6 +148,7 @@ function Accounting() {
 // ── Add Entry Drawer ────────────────────────────────────────────────────────
 
 function AddEntryDrawer() {
+  const { code: currencyCode } = useCurrency();
   const create = useCreateAccountingEntry();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
