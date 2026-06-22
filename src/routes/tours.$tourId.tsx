@@ -88,13 +88,13 @@ function TourSchedules() {
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span>{s.total_seats ?? 0} / {s.max_capacity}</span>
-                        {s.vehicle && (s.total_seats ?? 0) > s.vehicle_id ? null : null}
+                         {null}
                         {(() => {
                           const seats = s.total_seats ?? 0;
-                          const cap = s.max_capacity;
-                          if (seats === 0) return null;
+                          const cap = s.max_capacity ?? 0;
+                          if (seats === 0 || cap === 0) return null;
                           if (seats > cap)
-                            return <span title={`${seats} booked seats exceed max capacity of ${cap}`}><AlertTriangle className="h-3.5 w-3.5 text-destructive" /></span>;
+                            return <span title={`${seats} booked seats exceed capacity of ${cap}`}><AlertTriangle className="h-3.5 w-3.5 text-destructive" /></span>;
                           if (cap - seats <= 2)
                             return <span title={`Only ${cap - seats} seat(s) remaining`}><AlertTriangle className="h-3.5 w-3.5 text-amber" /></span>;
                           return null;

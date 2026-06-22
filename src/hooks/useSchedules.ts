@@ -76,7 +76,7 @@ export function useScheduledTours(tourId?: string) {
         booking_count: row.tour_bookings?.length ?? 0,
         total_seats: (row.tour_bookings ?? []).reduce((sum: number, b: any) => sum + (b.seat_count ?? 1), 0),
         tour_bookings: undefined,
-      })) as ScheduledTour[];
+      })) as unknown as ScheduledTour[];
     },
   });
 }
@@ -96,7 +96,7 @@ export function useScheduledTour(id: string) {
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as ScheduledTour;
+      return data as unknown as ScheduledTour;
     },
     enabled: !!id,
   });
@@ -108,7 +108,7 @@ export function useCreateScheduledTour() {
     mutationFn: async (s: ScheduledTourInsert) => {
       const { data, error } = await supabase
         .from("scheduled_tours")
-        .insert(s)
+        .insert(s as any)
         .select()
         .single();
       if (error) throw error;
@@ -129,7 +129,7 @@ export function useUpdateScheduledTour() {
     mutationFn: async ({ id, ...update }: ScheduledTourUpdate & { id: string }) => {
       const { data, error } = await supabase
         .from("scheduled_tours")
-        .update(update)
+        .update(update as any)
         .eq("id", id)
         .select()
         .single();

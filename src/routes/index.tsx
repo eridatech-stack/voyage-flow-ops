@@ -317,6 +317,7 @@ function TodaysActivity({ schedules, todayStr }: { schedules: CalendarEvent[]; t
 // ── Recent Activity ─────────────────────────────────────────────────────────
 
 function RecentActivity({ entries }: { entries: any[] }) {
+  const { format } = useCurrency();
   return (
     <Card className="overflow-hidden p-0">
       <div className="border-b border-border px-5 py-3">

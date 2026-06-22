@@ -100,7 +100,7 @@ function VehicleDrawer({ mode, vehicle }: { mode: "create" | "edit"; vehicle?: V
   const submit = async () => {
     const payload = {
       name: form.name,
-      type: form.type as Vehicle["type"],
+      type: form.type as Vehicle["type"],  // already cast
       plate_number: form.plate_number,
       capacity: Number(form.capacity) || 1,
       status: form.status as Vehicle["status"],
@@ -124,7 +124,7 @@ function VehicleDrawer({ mode, vehicle }: { mode: "create" | "edit"; vehicle?: V
         <div className="space-y-4 px-4 py-4">
           <F label="Name *"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
           <F label="Type">
-            <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+             <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as Vehicle["type"] })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="sedan">Sedan</SelectItem>
@@ -137,7 +137,7 @@ function VehicleDrawer({ mode, vehicle }: { mode: "create" | "edit"; vehicle?: V
           <F label="Plate Number"><Input value={form.plate_number} onChange={(e) => setForm({ ...form, plate_number: e.target.value })} /></F>
           <F label="Capacity"><Input type="number" min={1} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} /></F>
           <F label="Status">
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+             <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Vehicle["status"] })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="available">Available</SelectItem>
@@ -246,7 +246,7 @@ function DriverDrawer({ mode, driver, vehicles }: { mode: "create" | "edit"; dri
           <F label="Phone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></F>
           <F label="License Type"><Input placeholder="e.g. Cat. D" value={form.license_type} onChange={(e) => setForm({ ...form, license_type: e.target.value })} /></F>
           <F label="Status">
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+             <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Driver["status"] })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="available">Available</SelectItem>

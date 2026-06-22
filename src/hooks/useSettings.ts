@@ -45,7 +45,7 @@ export function useSettings() {
     queryKey: ["agency_settings"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("agency_settings")
+        .from("agency_settings" as any)
         .select("*")
         .eq("id", SETTINGS_ID)
         .single();
@@ -54,7 +54,7 @@ export function useSettings() {
         console.warn("Settings table not ready:", error.message);
         return DEFAULT_SETTINGS;
       }
-      return data as AgencySettings;
+      return data as unknown as AgencySettings;
     },
   });
 }
@@ -64,12 +64,12 @@ export function useUpdateSettings() {
   return useMutation({
     mutationFn: async (update: Partial<Omit<AgencySettings, "id">>) => {
       const { data, error } = await supabase
-        .from("agency_settings")
+        .from("agency_settings" as any)
         .upsert({ id: SETTINGS_ID, ...update })
         .select()
         .single();
       if (error) throw error;
-      return data as AgencySettings;
+      return data as unknown as AgencySettings;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["agency_settings"] });

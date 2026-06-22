@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Plus, Edit, Trash2, Loader2, Route, Calendar,
+  Plus, Edit, Trash2, Loader2, Route as RouteIcon, Calendar,
   Clock, MapPin, Car, User, Users, ChevronRight,
 } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
@@ -87,7 +87,7 @@ function TripsIndex() {
             title={statusFilter === "all" ? "No trips yet" : `No ${statusFilter} trips`}
             description="Create a custom trip for a client order."
             action={<TripDrawer mode="create" />}
-            icon={<Route className="h-10 w-10" />}
+            icon={<RouteIcon className="h-10 w-10" />}
           />
         ) : (
           <div className="space-y-3">

@@ -121,6 +121,7 @@ export function useUpdateTourBooking() {
     mutationFn: async ({
       bookingId,
       scheduledTourId,
+      customerId,
       customerUpdate,
       bookingUpdate,
     }: {
@@ -134,7 +135,7 @@ export function useUpdateTourBooking() {
         const { error } = await supabase
           .from("customers")
           .update(customerUpdate)
-          .eq("id", (await supabase.from("tour_bookings").select("customer_id").eq("id", bookingId).single()).data?.customer_id);
+          .eq("id", customerId);
         if (error) throw error;
       }
       if (bookingUpdate) {

@@ -74,7 +74,7 @@ export function useTrips() {
           (sum: number, b: any) => sum + (b.passenger_count ?? 1), 0
         ),
         trip_bookings: undefined,
-      })) as Trip[];
+      })) as unknown as Trip[];
     },
   });
 }
@@ -95,7 +95,7 @@ export function useTrip(id: string) {
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as Trip;
+      return data as unknown as Trip;
     },
     enabled: !!id,
   });
@@ -110,7 +110,7 @@ export function useCreateTrip() {
       const { data, error } = await supabase
         .from("trips").insert(trip).select().single();
       if (error) throw error;
-      return data as Trip;
+      return data as unknown as Trip;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["trips"] });
@@ -129,7 +129,7 @@ export function useUpdateTrip() {
       const { data, error } = await supabase
         .from("trips").update(update).eq("id", id).select().single();
       if (error) throw error;
-      return data as Trip;
+      return data as unknown as Trip;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["trips"] });
@@ -169,7 +169,7 @@ export function useTripBookings(tripId: string) {
         .eq("trip_id", tripId)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return data as TripBooking[];
+      return data as unknown as TripBooking[];
     },
     enabled: !!tripId,
   });
