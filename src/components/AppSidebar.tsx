@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { LayoutDashboard, MapPin, Car, Wallet, Settings, Plane, LogOut, KeyRound, Loader2 } from "lucide-react";
+import { LayoutDashboard, MapPin, Car, Wallet, Settings, Plane, LogOut, KeyRound, Loader2, Route } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -18,12 +18,13 @@ import { Button } from "@/components/ui/button";
 import { useSignOut, useChangePassword } from "@/hooks/useAuth";
 
 const items = [
-  { title: "Dashboard",     url: "/",          icon: LayoutDashboard },
-  { title: "Tours",         url: "/tours",      icon: MapPin },
-  { title: "Transfers",     url: "/transfers",  icon: Plane },
-  { title: "Fleet & Drivers", url: "/fleet",   icon: Car },
-  { title: "Accounting",    url: "/accounting", icon: Wallet },
-  { title: "Settings",      url: "/settings",   icon: Settings },
+  { title: "Dashboard",       url: "/",          icon: LayoutDashboard },
+  { title: "Tours",           url: "/tours",      icon: MapPin },
+  { title: "Transfers",       url: "/transfers",  icon: Plane },
+  { title: "Trips",           url: "/trips",      icon: Route },
+  { title: "Fleet & Drivers", url: "/fleet",      icon: Car },
+  { title: "Accounting",      url: "/accounting", icon: Wallet },
+  { title: "Settings",        url: "/settings",   icon: Settings },
 ];
 
 export function AppSidebar({ user }: { user: User }) {

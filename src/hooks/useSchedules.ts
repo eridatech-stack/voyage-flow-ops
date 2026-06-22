@@ -257,7 +257,7 @@ export function useUpdateScheduledTransfer() {
 
 export interface CalendarEvent {
   id: string;
-  kind: "tour" | "transfer";
+  kind: "tour" | "transfer" | "trip";
   date: string;
   time: string | null;
   name: string;
@@ -269,7 +269,7 @@ export function useAllSchedules() {
   return useQuery({
     queryKey: ["all_schedules"],
     queryFn: async () => {
-      const [tours, transfers] = await Promise.all([
+      const [tours, transfers, trips] = await Promise.all([
         supabase
           .from("scheduled_tours")
           .select("id, tour_id, service_date, departure_time, status, tours(name)")
@@ -278,32 +278,33 @@ export function useAllSchedules() {
           .from("scheduled_transfers")
           .select("id, transfer_id, service_date, pickup_time, status, transfers(name)")
           .order("service_date"),
+        supabase
+          .from("trips")
+          .select("id, trip_date, pickup_time, status, title")
+          .order("trip_date"),
       ]);
 
       if (tours.error) throw tours.error;
       if (transfers.error) throw transfers.error;
+      // trips table may not exist yet — handle gracefully
+      const tripsData = trips.error ? [] : (trips.data ?? []);
 
       const tourEvents: CalendarEvent[] = (tours.data ?? []).map((r: any) => ({
-        id: r.id,
-        kind: "tour",
-        date: r.service_date,
-        time: r.departure_time,
-        name: r.tours?.name ?? "Tour",
-        status: r.status,
-        parentId: r.tour_id,
+        id: r.id, kind: "tour", date: r.service_date, time: r.departure_time,
+        name: r.tours?.name ?? "Tour", status: r.status, parentId: r.tour_id,
       }));
 
       const transferEvents: CalendarEvent[] = (transfers.data ?? []).map((r: any) => ({
-        id: r.id,
-        kind: "transfer",
-        date: r.service_date,
-        time: r.pickup_time,
-        name: r.transfers?.name ?? "Transfer",
-        status: r.status,
-        parentId: r.transfer_id,
+        id: r.id, kind: "transfer", date: r.service_date, time: r.pickup_time,
+        name: r.transfers?.name ?? "Transfer", status: r.status, parentId: r.transfer_id,
       }));
 
-      return [...tourEvents, ...transferEvents];
+      const tripEvents: CalendarEvent[] = tripsData.map((r: any) => ({
+        id: r.id, kind: "trip", date: r.trip_date, time: r.pickup_time,
+        name: r.title, status: r.status, parentId: r.id,
+      }));
+
+      return [...tourEvents, ...transferEvents, ...tripEvents];
     },
   });
 }

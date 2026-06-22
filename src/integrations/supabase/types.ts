@@ -382,6 +382,96 @@ export type Database = {
           },
         ]
       }
+      trips: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          trip_date: string
+          pickup_time: string | null
+          pickup_location: string | null
+          dropoff_location: string | null
+          vehicle_id: string | null
+          driver_id: string | null
+          status: string
+          base_price: number
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          trip_date: string
+          pickup_time?: string | null
+          pickup_location?: string | null
+          dropoff_location?: string | null
+          vehicle_id?: string | null
+          driver_id?: string | null
+          status?: string
+          base_price?: number
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          trip_date?: string
+          pickup_time?: string | null
+          pickup_location?: string | null
+          dropoff_location?: string | null
+          vehicle_id?: string | null
+          driver_id?: string | null
+          status?: string
+          base_price?: number
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      trip_bookings: {
+        Row: {
+          id: string
+          trip_id: string
+          customer_id: string
+          passenger_count: number
+          luggage_count: number
+          flight_number: string | null
+          flight_time: string | null
+          voucher_status: string
+          amount: number | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trip_id: string
+          customer_id: string
+          passenger_count?: number
+          luggage_count?: number
+          flight_number?: string | null
+          flight_time?: string | null
+          voucher_status?: string
+          amount?: number | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trip_id?: string
+          customer_id?: string
+          passenger_count?: number
+          luggage_count?: number
+          flight_number?: string | null
+          flight_time?: string | null
+          voucher_status?: string
+          amount?: number | null
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       transfers: {
         Row: {
           base_price: number
