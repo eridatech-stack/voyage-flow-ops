@@ -61,6 +61,8 @@ export function useTourBookings(scheduledTourId: string) {
 export interface AddTourBookingInput {
   scheduled_tour_id: string;
   seat_count: number;
+  amount?: number;
+  payment_method?: string;
   notes?: string;
   // customer fields
   full_name: string;
@@ -104,11 +106,24 @@ export function useAddTourBooking() {
         .single();
       if (bErr) throw bErr;
 
+      // Always create accounting entry
+      await supabase.from("accounting_entries").insert({
+        service_type: "tour",
+        booking_id: booking.id,
+        customer_id: customer.id,
+        amount: input.amount ?? 0,
+        payment_method: input.payment_method ?? null,
+        status: input.payment_status === "paid" ? "paid" : "pending",
+        entry_date: new Date().toISOString().slice(0, 10),
+        notes: `Tour booking: ${input.booking_reference ?? booking.id.slice(0, 8)}`,
+      });
       return booking;
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["tour_bookings", vars.scheduled_tour_id] });
       qc.invalidateQueries({ queryKey: ["scheduled_tours"] });
+      qc.invalidateQueries({ queryKey: ["accounting"] });
+      qc.invalidateQueries({ queryKey: ["accounting_summary"] });
       toast.success("Customer added");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -235,6 +250,8 @@ export interface AddTransferBookingInput {
   luggage_count: number;
   flight_number?: string;
   flight_time?: string;
+  amount?: number;
+  payment_method?: string;
   notes?: string;
   // customer fields
   full_name: string;
@@ -279,11 +296,24 @@ export function useAddTransferBooking() {
         .single();
       if (bErr) throw bErr;
 
+      // Always create accounting entry
+      await supabase.from("accounting_entries").insert({
+        service_type: "transfer",
+        booking_id: booking.id,
+        customer_id: customer.id,
+        amount: input.amount ?? 0,
+        payment_method: input.payment_method ?? null,
+        status: input.payment_status === "paid" ? "paid" : "pending",
+        entry_date: new Date().toISOString().slice(0, 10),
+        notes: `Transfer booking: ${input.booking_reference ?? booking.id.slice(0, 8)}`,
+      });
       return booking;
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["transfer_bookings", vars.scheduled_transfer_id] });
       qc.invalidateQueries({ queryKey: ["scheduled_transfers"] });
+      qc.invalidateQueries({ queryKey: ["accounting"] });
+      qc.invalidateQueries({ queryKey: ["accounting_summary"] });
       toast.success("Customer added");
     },
     onError: (e: Error) => toast.error(e.message),

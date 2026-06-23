@@ -223,6 +223,7 @@ function AddCustomerDrawer({ scheduledTransferId }: { scheduledTransferId: strin
     passenger_count: "1", luggage_count: "0",
     flight_number: "", flight_time: "",
     booking_reference: "", special_requests: "",
+    amount: "", payment_method: "cash",
     payment_status: "pending" as "paid" | "pending" | "refunded",
   });
 
@@ -242,7 +243,7 @@ function AddCustomerDrawer({ scheduledTransferId }: { scheduledTransferId: strin
       payment_status: form.payment_status,
     });
     setOpen(false);
-    setForm({ full_name: "", email: "", phone: "", passenger_count: "1", luggage_count: "0", flight_number: "", flight_time: "", booking_reference: "", special_requests: "", payment_status: "pending" });
+    setForm({ full_name: "", email: "", phone: "", passenger_count: "1", luggage_count: "0", flight_number: "", flight_time: "", booking_reference: "", special_requests: "", amount: "", payment_method: "cash", payment_status: "pending" });
   };
 
   return (
@@ -265,6 +266,21 @@ function AddCustomerDrawer({ scheduledTransferId }: { scheduledTransferId: strin
           <div className="grid grid-cols-2 gap-3">
             <F label="Flight Number"><Input placeholder="e.g. U6 302" value={form.flight_number} onChange={(e) => setForm({ ...form, flight_number: e.target.value })} /></F>
             <F label="Flight Time"><Input placeholder="e.g. 14:30" value={form.flight_time} onChange={(e) => setForm({ ...form, flight_time: e.target.value })} /></F>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Amount">
+              <Input type="number" min={0} step={0.01} placeholder="0.00" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+            </F>
+            <F label="Payment Method">
+              <Select value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+            </F>
           </div>
           <F label="Booking Reference"><Input placeholder="auto-generated if empty" value={form.booking_reference} onChange={(e) => setForm({ ...form, booking_reference: e.target.value })} /></F>
           <F label="Special Requests"><Textarea rows={2} value={form.special_requests} onChange={(e) => setForm({ ...form, special_requests: e.target.value })} /></F>

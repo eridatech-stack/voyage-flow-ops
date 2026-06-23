@@ -220,6 +220,7 @@ function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "", seat_count: "1",
     booking_reference: "", special_requests: "",
+    amount: "", payment_method: "cash",
     payment_status: "pending" as "paid" | "pending" | "refunded",
   });
 
@@ -228,6 +229,8 @@ function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
     await add.mutateAsync({
       scheduled_tour_id: scheduledTourId,
       seat_count: Number(form.seat_count) || 1,
+      amount: form.amount ? Number(form.amount) : undefined,
+      payment_method: form.payment_method || undefined,
       full_name: form.full_name,
       email: form.email || undefined,
       phone: form.phone || undefined,
@@ -236,7 +239,7 @@ function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
       payment_status: form.payment_status,
     });
     setOpen(false);
-    setForm({ full_name: "", email: "", phone: "", seat_count: "1", booking_reference: "", special_requests: "", payment_status: "pending" });
+    setForm({ full_name: "", email: "", phone: "", seat_count: "1", booking_reference: "", special_requests: "", amount: "", payment_method: "cash", payment_status: "pending" });
   };
 
   return (
@@ -257,6 +260,21 @@ function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
             <F label="Booking Ref"><Input value={form.booking_reference} onChange={(e) => setForm({ ...form, booking_reference: e.target.value })} placeholder="auto" /></F>
           </div>
           <F label="Special Requests"><Textarea rows={2} value={form.special_requests} onChange={(e) => setForm({ ...form, special_requests: e.target.value })} /></F>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Amount">
+              <Input type="number" min={0} step={0.01} placeholder="0.00" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+            </F>
+            <F label="Payment Method">
+              <Select value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+            </F>
+          </div>
           <F label="Payment Status">
             <Select value={form.payment_status} onValueChange={(v) => setForm({ ...form, payment_status: v as "paid" | "pending" | "refunded" })}>
               <SelectTrigger><SelectValue /></SelectTrigger>

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useAccountingEntries, useAccountingSummary, useCreateAccountingEntry } from "@/hooks/useAccounting";
+import { useAccountingEntries, useAccountingSummary, useCreateAccountingEntry, useUpdateAccountingEntry } from "@/hooks/useAccounting";
 import { useCurrency } from "@/hooks/useCurrency";
 
 export const Route = createFileRoute("/accounting")({
@@ -132,7 +132,7 @@ function Accounting() {
                     <TableCell>{e.customer?.full_name ?? "—"}</TableCell>
                     <TableCell className="font-medium">{format(e.amount)}</TableCell>
                     <TableCell>{e.payment_method ?? "—"}</TableCell>
-                    <TableCell><StatusBadge status={e.status} /></TableCell>
+                    <TableCell><InlineStatusSelect entry={e} /></TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{e.notes ?? "—"}</TableCell>
                   </TableRow>
                 ))}
@@ -145,6 +145,37 @@ function Accounting() {
   );
 }
 
+
+// ── Inline Status Select ────────────────────────────────────────────────────
+
+function InlineStatusSelect({ entry }: { entry: { id: string; status: string } }) {
+  const update = useUpdateAccountingEntry();
+  return (
+    <Select
+      value={entry.status}
+      onValueChange={(v) =>
+        update.mutate({ id: entry.id, status: v as "paid" | "pending" | "refunded" })
+      }
+    >
+      <SelectTrigger className={`h-7 w-28 border-0 px-2 text-xs font-medium shadow-none focus:ring-0 rounded-full
+        ${entry.status === "paid"
+          ? "bg-status-confirmed/15 text-status-confirmed"
+          : entry.status === "refunded"
+          ? "bg-status-cancelled/15 text-status-cancelled"
+          : "bg-status-pending/20 text-status-pending"
+        }`}
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="pending">Pending</SelectItem>
+        <SelectItem value="paid">Paid</SelectItem>
+        <SelectItem value="refunded">Refunded</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
 // ── Add Entry Drawer ────────────────────────────────────────────────────────
 
 function AddEntryDrawer() {
@@ -152,7 +183,7 @@ function AddEntryDrawer() {
   const create = useCreateAccountingEntry();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    service_type: "tour" as "tour" | "transfer",
+    service_type: "tour" as "tour" | "transfer" | "trip",
     amount: "",
     payment_method: "cash",
     status: "paid" as "paid" | "pending" | "refunded",
@@ -163,7 +194,7 @@ function AddEntryDrawer() {
   const submit = async () => {
     if (!form.amount) { toast.error("Amount is required"); return; }
     await create.mutateAsync({
-      service_type: form.service_type,
+      service_type: form.service_type as "tour" | "transfer",
       amount: Number(form.amount),
       payment_method: form.payment_method,
       status: form.status,
@@ -191,6 +222,7 @@ function AddEntryDrawer() {
                 <SelectContent>
                   <SelectItem value="tour">Tour</SelectItem>
                   <SelectItem value="transfer">Transfer</SelectItem>
+                  <SelectItem value="trip">Trip</SelectItem>
                 </SelectContent>
               </Select>
             </F>

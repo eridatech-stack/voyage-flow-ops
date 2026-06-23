@@ -223,11 +223,25 @@ export function useAddTripBooking() {
         })
         .select().single();
       if (bErr) throw bErr;
+
+      // Always create accounting entry
+      await supabase.from("accounting_entries").insert({
+        service_type: "trip",
+        booking_id: booking.id,
+        customer_id: customer.id,
+        amount: input.amount ?? 0,
+        payment_method: null,
+        status: input.payment_status === "paid" ? "paid" : "pending",
+        entry_date: new Date().toISOString().slice(0, 10),
+        notes: `Trip: ${input.booking_reference ?? booking.id.slice(0, 8)}`,
+      });
       return booking;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["trip_bookings", vars.trip_id] });
       qc.invalidateQueries({ queryKey: ["trips"] });
+      qc.invalidateQueries({ queryKey: ["accounting"] });
+      qc.invalidateQueries({ queryKey: ["accounting_summary"] });
       toast.success("Customer added");
     },
     onError: (e: Error) => toast.error(e.message),

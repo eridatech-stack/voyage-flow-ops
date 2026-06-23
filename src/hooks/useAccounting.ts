@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export interface AccountingEntry {
   id: string;
-  service_type: "tour" | "transfer";
+  service_type: "tour" | "transfer" | "trip";
   booking_id: string | null;
   customer_id: string | null;
   amount: number;
