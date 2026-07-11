@@ -89,12 +89,12 @@ export interface FileRoutesByFullPath {
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
   '/settings': typeof SettingsRoute
-  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
-  '/trips/': typeof TripsIndexRoute
+  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/': typeof ToursIndexRoute
   '/transfers/': typeof TransfersIndexRoute
+  '/trips/': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
@@ -103,12 +103,12 @@ export interface FileRoutesByTo {
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
   '/settings': typeof SettingsRoute
-  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
-  '/trips': typeof TripsIndexRoute
+  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours': typeof ToursIndexRoute
   '/transfers': typeof TransfersIndexRoute
+  '/trips': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
@@ -118,12 +118,12 @@ export interface FileRoutesById {
   '/accounting': typeof AccountingRoute
   '/fleet': typeof FleetRoute
   '/settings': typeof SettingsRoute
-  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/$tourId': typeof ToursTourIdRoute
   '/transfers/$transferId': typeof TransfersTransferIdRoute
-  '/trips/': typeof TripsIndexRoute
+  '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/': typeof ToursIndexRoute
   '/transfers/': typeof TransfersIndexRoute
+  '/trips/': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
 }
@@ -134,12 +134,12 @@ export interface FileRouteTypes {
     | '/accounting'
     | '/fleet'
     | '/settings'
-    | '/trips/$tripId'
     | '/tours/$tourId'
     | '/transfers/$transferId'
-    | '/trips/'
+    | '/trips/$tripId'
     | '/tours/'
     | '/transfers/'
+    | '/trips/'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
   fileRoutesByTo: FileRoutesByTo
@@ -148,12 +148,12 @@ export interface FileRouteTypes {
     | '/accounting'
     | '/fleet'
     | '/settings'
-    | '/trips/$tripId'
     | '/tours/$tourId'
     | '/transfers/$transferId'
-    | '/trips'
+    | '/trips/$tripId'
     | '/tours'
     | '/transfers'
+    | '/trips'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
   id:
@@ -162,12 +162,12 @@ export interface FileRouteTypes {
     | '/accounting'
     | '/fleet'
     | '/settings'
-    | '/trips/$tripId'
     | '/tours/$tourId'
     | '/transfers/$transferId'
-    | '/trips/'
+    | '/trips/$tripId'
     | '/tours/'
     | '/transfers/'
+    | '/trips/'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
   fileRoutesById: FileRoutesById
@@ -177,12 +177,12 @@ export interface RootRouteChildren {
   AccountingRoute: typeof AccountingRoute
   FleetRoute: typeof FleetRoute
   SettingsRoute: typeof SettingsRoute
-  TripsTripIdRoute: typeof TripsTripIdRoute
   ToursTourIdRoute: typeof ToursTourIdRoute
   TransfersTransferIdRoute: typeof TransfersTransferIdRoute
-  TripsIndexRoute: typeof TripsIndexRoute
+  TripsTripIdRoute: typeof TripsTripIdRoute
   ToursIndexRoute: typeof ToursIndexRoute
   TransfersIndexRoute: typeof TransfersIndexRoute
+  TripsIndexRoute: typeof TripsIndexRoute
   ToursScheduleScheduleIdRoute: typeof ToursScheduleScheduleIdRoute
   TransfersScheduleScheduleIdRoute: typeof TransfersScheduleScheduleIdRoute
 }
@@ -281,15 +281,25 @@ const rootRouteChildren: RootRouteChildren = {
   AccountingRoute: AccountingRoute,
   FleetRoute: FleetRoute,
   SettingsRoute: SettingsRoute,
-  TripsTripIdRoute: TripsTripIdRoute,
   ToursTourIdRoute: ToursTourIdRoute,
   TransfersTransferIdRoute: TransfersTransferIdRoute,
-  TripsIndexRoute: TripsIndexRoute,
+  TripsTripIdRoute: TripsTripIdRoute,
   ToursIndexRoute: ToursIndexRoute,
   TransfersIndexRoute: TransfersIndexRoute,
+  TripsIndexRoute: TripsIndexRoute,
   ToursScheduleScheduleIdRoute: ToursScheduleScheduleIdRoute,
   TransfersScheduleScheduleIdRoute: TransfersScheduleScheduleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
