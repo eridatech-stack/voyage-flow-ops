@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { LayoutDashboard, MapPin, Car, Wallet, Settings, Plane, LogOut, KeyRound, Loader2, Route } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import type { AppUser } from "@/hooks/useAuth";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -27,13 +27,13 @@ const items = [
   { title: "Settings",        url: "/settings",   icon: Settings },
 ];
 
-export function AppSidebar({ user }: { user: User }) {
+export function AppSidebar({ user }: { user: AppUser }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (url: string) => url === "/" ? pathname === "/" : pathname.startsWith(url);
   const signOut = useSignOut();
   const [changePwOpen, setChangePwOpen] = useState(false);
 
-  const displayName = user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Operator";
+  const displayName = user.fullName ?? user.email?.split("@")[0] ?? "Operator";
   const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (

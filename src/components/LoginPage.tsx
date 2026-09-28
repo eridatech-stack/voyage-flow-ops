@@ -24,6 +24,7 @@ export function LoginPage() {
     }
     try {
       await signIn.mutateAsync({ email, password });
+      window.location.reload();
       // No reload needed — onAuthStateChange fires and AuthGate re-renders
     } catch (err: any) {
       setError(err?.message ?? "Invalid credentials. Please try again.");

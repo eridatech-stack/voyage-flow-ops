@@ -80,7 +80,7 @@ function TourSchedules() {
               <TableBody>
                 {schedules.map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.service_date}</TableCell>
+                    <TableCell className="font-medium">{String(s.service_date).slice(0,10)}</TableCell>
                     <TableCell>{s.departure_time ?? "—"}</TableCell>
                     <TableCell>{s.guide_name ?? <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell>{s.driver?.full_name ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>

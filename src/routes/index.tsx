@@ -23,9 +23,9 @@ function Dashboard() {
   const { data: recentEntries = [] } = useAccountingEntries();
 
   const todayStr = localDateStr(new Date());
-  const todaysTours = allSchedules.filter((s) => s.kind === "tour" && s.date === todayStr);
-  const todaysTrips = allSchedules.filter((s) => s.kind === "trip" && s.date === todayStr);
-  const todaysTransfers = allSchedules.filter((s) => s.kind === "transfer" && s.date === todayStr);
+  const todaysTours = allSchedules.filter((s) => s.kind === "tour" && String(s.date).slice(0,10) === todayStr);
+  const todaysTrips = allSchedules.filter((s) => s.kind === "trip" && String(s.date).slice(0,10) === todayStr);
+  const todaysTransfers = allSchedules.filter((s) => s.kind === "transfer" && String(s.date).slice(0,10) === todayStr);
 
   // Count unique customers from recent accounting entries as proxy
   const activeCustomers = recentEntries.length;
@@ -281,7 +281,7 @@ function DayList({ cursor, schedules }: { cursor: Date; schedules: CalendarEvent
 
 function TodaysActivity({ schedules, todayStr }: { schedules: CalendarEvent[]; todayStr: string }) {
   const today = schedules
-    .filter((s) => s.date === todayStr)
+    .filter((s) => String(s.date).slice(0,10) === todayStr)
     .sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
 
   return (
