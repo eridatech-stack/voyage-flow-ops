@@ -9,6 +9,18 @@ import { db } from "./client";
 import { accounting_entries, tour_bookings, transfer_bookings, trip_bookings, scheduled_tours, scheduled_transfers, trips } from "./schema";
 import { eq } from "drizzle-orm";
 
+function toYMD(d: any): string {
+  if (!d) return "";
+  if (d instanceof Date) return d.toISOString().slice(0, 10);
+  const s = String(d);
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  // Try parsing
+  const parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  return s.slice(0, 10);
+}
+
 async function fixDates() {
   console.log("🔧 Fixing accounting entry dates...\n");
 
@@ -35,7 +47,7 @@ async function fixDates() {
         .where(eq(tour_bookings.id, entry.booking_id))
         .limit(1);
       if (booking?.service_date) {
-        serviceDate = String(booking.service_date).slice(0, 10);
+        serviceDate = toYMD(booking.service_date);
       }
 
     } else if (entry.service_type === "transfer") {
@@ -46,7 +58,7 @@ async function fixDates() {
         .where(eq(transfer_bookings.id, entry.booking_id))
         .limit(1);
       if (booking?.service_date) {
-        serviceDate = String(booking.service_date).slice(0, 10);
+        serviceDate = toYMD(booking.service_date);
       }
 
     } else if (entry.service_type === "trip") {
@@ -57,12 +69,12 @@ async function fixDates() {
         .where(eq(trip_bookings.id, entry.booking_id))
         .limit(1);
       if (booking?.trip_date) {
-        serviceDate = String(booking.trip_date).slice(0, 10);
+        serviceDate = toYMD(booking.trip_date);
       }
     }
 
     if (serviceDate) {
-      const currentDate = String(entry.entry_date).slice(0, 10);
+      const currentDate = toYMD(entry.entry_date);
 
       if (currentDate !== serviceDate) {
         await db.update(accounting_entries)
