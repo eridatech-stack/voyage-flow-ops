@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Edit, Archive, Calendar, Plane, MapPin, DollarSign, Loader2 } from "lucide-react";
+import { Plus, Edit, Archive, Calendar, Plane, MapPin, Loader2 } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

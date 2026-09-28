@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Archive, Edit, Calendar, MapPin, Clock, DollarSign, Loader2 } from "lucide-react";
+import { Plus, Archive, Edit, Calendar, MapPin, Clock, Loader2 } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ function ToursIndex() {
                   <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
                     {t.destination && <div className="flex items-center gap-2"><MapPin className="h-3 w-3" /> {t.destination}</div>}
                     {t.duration && <div className="flex items-center gap-2"><Clock className="h-3 w-3" /> {t.duration}</div>}
-                    <div className="flex items-center gap-2"><DollarSign className="h-3 w-3" /> from {format(t.base_price)}</div>
+                    <div className="text-sm font-medium">{format(t.base_price)}</div>
                   </div>
                   <div className="mt-5 flex gap-2 border-t border-border pt-4">
                     <Button asChild size="sm" className="flex-1">
