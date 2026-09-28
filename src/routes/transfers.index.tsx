@@ -82,7 +82,7 @@ function TransfersIndex() {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-3 w-3" /> from {format(t.base_price)}
+                      {format(t.base_price)}
                     </div>
                   </div>
                   <div className="mt-5 flex gap-2 border-t border-border pt-4">
