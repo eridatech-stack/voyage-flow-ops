@@ -134,13 +134,13 @@ export const getTransferBookings = createServerFn({ method: "GET" })
   });
 
 export const addTransferBooking = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ scheduled_transfer_id: z.string(), passenger_count: z.number(), luggage_count: z.number(), flight_number: z.string().optional(), flight_time: z.string().optional(), amount: z.number().optional(), payment_method: z.string().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
+  .inputValidator(z.object({ scheduled_transfer_id: z.string(), passenger_count: z.number(), luggage_count: z.number(), service_date: z.string().optional(), flight_number: z.string().optional(), flight_time: z.string().optional(), amount: z.number().optional(), payment_method: z.string().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
   .handler(async ({ data }) => {
     const customerId = createId();
     await db.insert(customers).values({ id: customerId, full_name: data.full_name, email: data.email ?? null, phone: data.phone ?? null, booking_reference: data.booking_reference ?? `BK-${Date.now().toString().slice(-6)}`, special_requests: data.special_requests ?? null, payment_status: data.payment_status });
     const bookingId = createId();
     await db.insert(transfer_bookings).values({ id: bookingId, scheduled_transfer_id: data.scheduled_transfer_id, customer_id: customerId, passenger_count: data.passenger_count, luggage_count: data.luggage_count, flight_number: data.flight_number ?? null, flight_time: data.flight_time ?? null, amount: data.amount ? String(data.amount) : null, notes: data.notes ?? null, voucher_status: "pending" });
-    await db.insert(accounting_entries).values({ service_type: "transfer", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: data.payment_method ?? null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: new Date().toISOString().slice(0, 10) as any, notes: `Transfer: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
+    await db.insert(accounting_entries).values({ service_type: "transfer", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: data.payment_method ?? null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: (data.service_date ?? new Date().toISOString().slice(0, 10)) as any, notes: `Transfer: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
     return { success: true };
   });
 
@@ -222,13 +222,13 @@ export const getTripBookings = createServerFn({ method: "GET" })
   });
 
 export const addTripBooking = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ trip_id: z.string(), passenger_count: z.number(), luggage_count: z.number(), flight_number: z.string().optional(), flight_time: z.string().optional(), amount: z.number().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
+  .inputValidator(z.object({ trip_id: z.string(), passenger_count: z.number(), luggage_count: z.number(), trip_date: z.string().optional(), flight_number: z.string().optional(), flight_time: z.string().optional(), amount: z.number().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
   .handler(async ({ data }) => {
     const customerId = createId();
     await db.insert(customers).values({ id: customerId, full_name: data.full_name, email: data.email ?? null, phone: data.phone ?? null, booking_reference: data.booking_reference ?? `TR-${Date.now().toString().slice(-6)}`, special_requests: data.special_requests ?? null, payment_status: data.payment_status });
     const bookingId = createId();
     await db.insert(trip_bookings).values({ id: bookingId, trip_id: data.trip_id, customer_id: customerId, passenger_count: data.passenger_count, luggage_count: data.luggage_count, flight_number: data.flight_number ?? null, flight_time: data.flight_time ?? null, amount: data.amount ? String(data.amount) : null, notes: data.notes ?? null, voucher_status: "pending" });
-    await db.insert(accounting_entries).values({ service_type: "trip", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: new Date().toISOString().slice(0, 10) as any, notes: `Trip: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
+    await db.insert(accounting_entries).values({ service_type: "trip", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: (data.trip_date ?? new Date().toISOString().slice(0, 10)) as any, notes: `Trip: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
     return { success: true };
   });
 

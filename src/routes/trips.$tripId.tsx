@@ -109,7 +109,7 @@ function TripDetail() {
             >
               <Send className="h-3.5 w-3.5" /> Send All
             </Button>
-            <AddCustomerDrawer tripId={tripId} />
+            <AddCustomerDrawer tripId={tripId} tripDate={trip.trip_date} />
           </div>
         </div>
       </div>
@@ -131,7 +131,7 @@ function TripDetail() {
             <div className="flex flex-col items-center gap-3 p-10 text-center">
               <Users className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">No customers added yet.</p>
-              <AddCustomerDrawer tripId={tripId} />
+              <AddCustomerDrawer tripId={tripId} tripDate={trip.trip_date} />
             </div>
           ) : (
             <Table>
@@ -249,7 +249,7 @@ function QuickStatusChanger({ trip }: { trip: { id: string; status: string } }) 
 
 // ── Add Customer Drawer ─────────────────────────────────────────────────────
 
-function AddCustomerDrawer({ tripId }: { tripId: string }) {
+function AddCustomerDrawer({ tripId, tripDate }: { tripId: string; tripDate: string }) {
   const add = useAddTripBooking();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -265,6 +265,7 @@ function AddCustomerDrawer({ tripId }: { tripId: string }) {
     if (!form.full_name) { toast.error("Name is required"); return; }
     await add.mutateAsync({
       trip_id: tripId,
+      trip_date: tripDate,
       passenger_count: Number(form.passenger_count) || 1,
       luggage_count: Number(form.luggage_count) || 0,
       flight_number: form.flight_number || undefined,

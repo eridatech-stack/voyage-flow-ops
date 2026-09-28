@@ -105,13 +105,13 @@ export const getTourBookings = createServerFn({ method: "GET" })
   });
 
 export const addTourBooking = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ scheduled_tour_id: z.string(), seat_count: z.number(), amount: z.number().optional(), payment_method: z.string().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
+  .inputValidator(z.object({ scheduled_tour_id: z.string(), seat_count: z.number(), service_date: z.string().optional(), amount: z.number().optional(), payment_method: z.string().optional(), notes: z.string().optional(), full_name: z.string(), email: z.string().optional(), phone: z.string().optional(), booking_reference: z.string().optional(), special_requests: z.string().optional(), payment_status: z.enum(["paid", "pending", "refunded"]) }))
   .handler(async ({ data }) => {
     const customerId = createId();
     await db.insert(customers).values({ id: customerId, full_name: data.full_name, email: data.email ?? null, phone: data.phone ?? null, booking_reference: data.booking_reference ?? `BK-${Date.now().toString().slice(-6)}`, special_requests: data.special_requests ?? null, payment_status: data.payment_status });
     const bookingId = createId();
     await db.insert(tour_bookings).values({ id: bookingId, scheduled_tour_id: data.scheduled_tour_id, customer_id: customerId, seat_count: data.seat_count, amount: data.amount ? String(data.amount) : null, notes: data.notes ?? null, voucher_status: "pending" });
-    await db.insert(accounting_entries).values({ service_type: "tour", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: data.payment_method ?? null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: new Date().toISOString().slice(0, 10) as any, notes: `Tour booking: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
+    await db.insert(accounting_entries).values({ service_type: "tour", booking_id: bookingId, customer_id: customerId, amount: String(data.amount ?? 0), payment_method: data.payment_method ?? null, status: data.payment_status === "paid" ? "paid" : "pending", entry_date: (data.service_date ?? new Date().toISOString().slice(0, 10)) as any, notes: `Tour booking: ${data.booking_reference ?? bookingId.slice(0, 8)}` });
     return { success: true };
   });
 

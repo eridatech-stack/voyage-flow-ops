@@ -97,7 +97,7 @@ function TransferScheduleDetail() {
               {generateAll.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
               Generate All Vouchers
             </Button>
-            <AddCustomerDrawer scheduledTransferId={scheduleId} />
+            <AddCustomerDrawer scheduledTransferId={scheduleId} serviceDate={schedule.service_date} />
           </div>
         </div>
       </div>
@@ -215,7 +215,7 @@ function TransferScheduleDetail() {
 
 // ── Add Customer Drawer ─────────────────────────────────────────────────────
 
-function AddCustomerDrawer({ scheduledTransferId }: { scheduledTransferId: string }) {
+function AddCustomerDrawer({ scheduledTransferId, serviceDate }: { scheduledTransferId: string; serviceDate: string }) {
   const add = useAddTransferBooking();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -231,6 +231,7 @@ function AddCustomerDrawer({ scheduledTransferId }: { scheduledTransferId: strin
     if (!form.full_name) { toast.error("Name is required"); return; }
     await add.mutateAsync({
       scheduled_transfer_id: scheduledTransferId,
+      service_date: serviceDate,
       passenger_count: Number(form.passenger_count) || 1,
       luggage_count: Number(form.luggage_count) || 0,
       flight_number: form.flight_number || undefined,

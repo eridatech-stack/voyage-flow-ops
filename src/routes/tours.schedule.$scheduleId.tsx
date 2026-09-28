@@ -98,7 +98,7 @@ function TourScheduleDetail() {
               {generateAll.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
               Generate All Vouchers
             </Button>
-            <AddCustomerDrawer scheduledTourId={scheduleId} />
+            <AddCustomerDrawer scheduledTourId={scheduleId} serviceDate={schedule.service_date} />
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@ function TourScheduleDetail() {
 
 // ── Add Customer Drawer ─────────────────────────────────────────────────────
 
-function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
+function AddCustomerDrawer({ scheduledTourId, serviceDate }: { scheduledTourId: string; serviceDate: string }) {
   const add = useAddTourBooking();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -229,6 +229,7 @@ function AddCustomerDrawer({ scheduledTourId }: { scheduledTourId: string }) {
     await add.mutateAsync({
       scheduled_tour_id: scheduledTourId,
       seat_count: Number(form.seat_count) || 1,
+      service_date: serviceDate,
       amount: form.amount ? Number(form.amount) : undefined,
       payment_method: form.payment_method || undefined,
       full_name: form.full_name,
