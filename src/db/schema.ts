@@ -1,6 +1,6 @@
 import {
   mysqlTable, varchar, text, boolean, int,
-  decimal, date, time, timestamp, mysqlEnum,
+  decimal, date, time, timestamp, mysqlEnum, foreignKey,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -169,7 +169,7 @@ export const tour_bookings = mysqlTable("tour_bookings", {
 
 export const transfer_bookings = mysqlTable("transfer_bookings", {
   id:                    varchar("id", { length: 128 }).primaryKey().$defaultFn(() => createId()),
-  scheduled_transfer_id: varchar("scheduled_transfer_id", { length: 128 }).notNull().references(() => scheduled_transfers.id, { onDelete: "cascade" }),
+  scheduled_transfer_id: varchar("scheduled_transfer_id", { length: 128 }).notNull(),
   customer_id:           varchar("customer_id", { length: 128 }).notNull().references(() => customers.id, { onDelete: "cascade" }),
   passenger_count:       int("passenger_count").notNull().default(1),
   luggage_count:         int("luggage_count").notNull().default(0),
@@ -179,7 +179,13 @@ export const transfer_bookings = mysqlTable("transfer_bookings", {
   amount:                decimal("amount", { precision: 10, scale: 2 }),
   notes:                 text("notes"),
   created_at:            now(),
-});
+}, (t) => ({
+  schedTransferFk: foreignKey({
+    name: "tb_sched_transfer_fk",
+    columns: [t.scheduled_transfer_id],
+    foreignColumns: [scheduled_transfers.id],
+  }).onDelete("cascade"),
+}));
 
 // ── Trip Bookings ─────────────────────────────────────────────────────────────
 
