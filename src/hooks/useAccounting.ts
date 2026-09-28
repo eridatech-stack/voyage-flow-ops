@@ -5,24 +5,16 @@ import { getAccountingEntries, createAccountingEntry, updateAccountingEntry, get
 export type AccountingEntry = Awaited<ReturnType<typeof getAccountingEntries>>[number];
 
 export function useAccountingEntries(filters?: { from?: string; to?: string; status?: string; service_type?: string }) {
-  return useQuery({ queryKey: ["accounting", filters], queryFn: () => getAccountingEntries(filters) });
+  return useQuery({ queryKey: ["accounting", filters], queryFn: () => getAccountingEntries({ data: filters ?? {} }) });
 }
 export function useCreateAccountingEntry() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: createAccountingEntry,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["accounting"] }); qc.invalidateQueries({ queryKey: ["accounting_summary"] }); toast.success("Entry added"); },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  return useMutation({ mutationFn: (d: any) => createAccountingEntry({ data: d }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["accounting"] }); qc.invalidateQueries({ queryKey: ["accounting_summary"] }); toast.success("Entry added"); }, onError: (e: Error) => toast.error(e.message) });
 }
 export function useUpdateAccountingEntry() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, ...data }: any) => updateAccountingEntry(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["accounting"] }); qc.invalidateQueries({ queryKey: ["accounting_summary"] }); toast.success("Entry updated"); },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  return useMutation({ mutationFn: (d: any) => updateAccountingEntry({ data: d }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["accounting"] }); qc.invalidateQueries({ queryKey: ["accounting_summary"] }); toast.success("Entry updated"); }, onError: (e: Error) => toast.error(e.message) });
 }
 export function useAccountingSummary() {
-  return useQuery({ queryKey: ["accounting_summary"], queryFn: getAccountingSummary });
+  return useQuery({ queryKey: ["accounting_summary"], queryFn: () => getAccountingSummary() });
 }

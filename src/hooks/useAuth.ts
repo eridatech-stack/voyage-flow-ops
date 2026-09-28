@@ -16,7 +16,7 @@ export function useAuth() {
   useEffect(() => {
     const token = getStoredToken();
     if (!token) { setUser(null); return; }
-    serverVerifyToken(token)
+    serverVerifyToken({ data: { token } })
       .then((payload) => setUser(payload as AppUser | null))
       .catch(() => setUser(null));
   }, []);
@@ -27,7 +27,7 @@ export function useAuth() {
 export function useSignIn() {
   return useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const result = await serverLogin(email, password);
+      const result = await serverLogin({ data: { email, password } });
       setStoredToken(result.token);
       return result;
     },
@@ -38,10 +38,7 @@ export function useSignIn() {
 export function useSignOut() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
-      removeStoredToken();
-      qc.clear();
-    },
+    mutationFn: async () => { removeStoredToken(); qc.clear(); },
     onSuccess: () => toast.success("Signed out"),
   });
 }
@@ -51,7 +48,7 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: async (newPassword: string) => {
       if (!user) throw new Error("Not authenticated");
-      await serverChangePassword(user.userId, newPassword);
+      await serverChangePassword({ data: { userId: user.userId, newPassword } });
     },
     onSuccess: () => toast.success("Password changed"),
     onError: (e: Error) => toast.error(e.message),

@@ -1,39 +1,43 @@
-"use server";
-
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { signToken, verifyToken, hashPassword, verifyPassword } from "@/lib/auth/jwt";
 
-export async function serverLogin(email: string, password: string) {
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (!user) throw new Error("Invalid email or password");
+export const serverLogin = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ email: z.string().email(), password: z.string().min(1) }))
+  .handler(async ({ data }) => {
+    const [user] = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (!user) throw new Error("Invalid email or password");
+    const valid = await verifyPassword(data.password, user.password_hash);
+    if (!valid) throw new Error("Invalid email or password");
+    const token = await signToken({ userId: user.id, email: user.email, fullName: user.full_name });
+    return { token, user: { id: user.id, email: user.email, fullName: user.full_name } };
+  });
 
-  const valid = await verifyPassword(password, user.password_hash);
-  if (!valid) throw new Error("Invalid email or password");
+export const serverVerifyToken = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ token: z.string() }))
+  .handler(async ({ data }) => {
+    return verifyToken(data.token);
+  });
 
-  const token = await signToken({ userId: user.id, email: user.email, fullName: user.full_name });
-  return { token, user: { id: user.id, email: user.email, fullName: user.full_name } };
-}
+export const serverChangePassword = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ userId: z.string(), newPassword: z.string().min(6) }))
+  .handler(async ({ data }) => {
+    const hash = await hashPassword(data.newPassword);
+    await db.update(users).set({ password_hash: hash }).where(eq(users.id, data.userId));
+    return { success: true };
+  });
 
-export async function serverRegister(email: string, password: string, fullName?: string) {
-  const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing) throw new Error("Email already in use");
-
-  const hash = await hashPassword(password);
-  const [result] = await db.insert(users).values({ email, password_hash: hash, full_name: fullName ?? null });
-  const id = String((result as any).insertId ?? "");
-
-  const token = await signToken({ userId: id, email, fullName: fullName ?? null });
-  return { token, user: { id, email, fullName } };
-}
-
-export async function serverVerifyToken(token: string) {
-  return verifyToken(token);
-}
-
-export async function serverChangePassword(userId: string, newPassword: string) {
-  const hash = await hashPassword(newPassword);
-  await db.update(users).set({ password_hash: hash }).where(eq(users.id, userId));
-  return { success: true };
-}
+export const serverRegister = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ email: z.string().email(), password: z.string().min(6), fullName: z.string().optional() }))
+  .handler(async ({ data }) => {
+    const [existing] = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing) throw new Error("Email already in use");
+    const hash = await hashPassword(data.password);
+    const [result] = await db.insert(users).values({ email: data.email, password_hash: hash, full_name: data.fullName ?? null });
+    const id = String((result as any).insertId ?? "");
+    const token = await signToken({ userId: id, email: data.email, fullName: data.fullName ?? null });
+    return { token, user: { id, email: data.email, fullName: data.fullName } };
+  });
