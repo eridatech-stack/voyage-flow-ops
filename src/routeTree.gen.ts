@@ -13,6 +13,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as AccountingRouteImport } from './routes/accounting'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CustomersIndexRouteImport } from './routes/customers.index'
 import { Route as TripsIndexRouteImport } from './routes/trips.index'
 import { Route as TransfersIndexRouteImport } from './routes/transfers.index'
 import { Route as ToursIndexRouteImport } from './routes/tours.index'
@@ -40,6 +41,11 @@ const AccountingRoute = AccountingRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomersIndexRoute = CustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TripsIndexRoute = TripsIndexRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/': typeof ToursIndexRoute
   '/transfers/': typeof TransfersIndexRoute
+  '/customers/': typeof CustomersIndexRoute
   '/trips/': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/trips/$tripId': typeof TripsTripIdRoute
   '/tours': typeof ToursIndexRoute
   '/transfers': typeof TransfersIndexRoute
+  '/customers': typeof CustomersIndexRoute
   '/trips': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/trips/$tripId': typeof TripsTripIdRoute
   '/tours/': typeof ToursIndexRoute
   '/transfers/': typeof TransfersIndexRoute
+  '/customers/': typeof CustomersIndexRoute
   '/trips/': typeof TripsIndexRoute
   '/tours/schedule/$scheduleId': typeof ToursScheduleScheduleIdRoute
   '/transfers/schedule/$scheduleId': typeof TransfersScheduleScheduleIdRoute
@@ -139,6 +148,8 @@ export interface FileRouteTypes {
     | '/trips/$tripId'
     | '/tours/'
     | '/transfers/'
+    | '/customers/'
+    | '/customers/'
     | '/trips/'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/trips/$tripId'
     | '/tours'
     | '/transfers'
+    | '/customers'
     | '/trips'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
@@ -167,6 +179,8 @@ export interface FileRouteTypes {
     | '/trips/$tripId'
     | '/tours/'
     | '/transfers/'
+    | '/customers/'
+    | '/customers/'
     | '/trips/'
     | '/tours/schedule/$scheduleId'
     | '/transfers/schedule/$scheduleId'
@@ -182,6 +196,7 @@ export interface RootRouteChildren {
   TripsTripIdRoute: typeof TripsTripIdRoute
   ToursIndexRoute: typeof ToursIndexRoute
   TransfersIndexRoute: typeof TransfersIndexRoute
+  CustomersIndexRoute: typeof CustomersIndexRoute
   TripsIndexRoute: typeof TripsIndexRoute
   ToursScheduleScheduleIdRoute: typeof ToursScheduleScheduleIdRoute
   TransfersScheduleScheduleIdRoute: typeof TransfersScheduleScheduleIdRoute
@@ -215,6 +230,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers/': {
+      id: '/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof CustomersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trips/': {
@@ -286,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   TripsTripIdRoute: TripsTripIdRoute,
   ToursIndexRoute: ToursIndexRoute,
   TransfersIndexRoute: TransfersIndexRoute,
+  CustomersIndexRoute: CustomersIndexRoute,
   TripsIndexRoute: TripsIndexRoute,
   ToursScheduleScheduleIdRoute: ToursScheduleScheduleIdRoute,
   TransfersScheduleScheduleIdRoute: TransfersScheduleScheduleIdRoute,

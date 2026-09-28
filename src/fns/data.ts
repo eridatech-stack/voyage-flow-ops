@@ -2,13 +2,47 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { db } from "@/db/client";
 import {
-  transfers, scheduled_transfers, transfer_bookings,
+  customers, transfers, scheduled_transfers, transfer_bookings,
   trips, trip_bookings, vehicles, drivers,
-  customers, accounting_entries, agency_settings,
+  accounting_entries, agency_settings,
 } from "@/db/schema";
 import { eq, desc, asc } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { normalizeDate, normalizeTime, normalizeDecimal } from "@/lib/normalize";
+
+
+// ── Customers ─────────────────────────────────────────────────────────────────
+
+export const getCustomers = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ search: z.string().optional(), payment_status: z.string().optional() }))
+  .handler(async ({ data }) => {
+    const rows = await db.query.customers.findMany({
+      orderBy: [desc(customers.created_at)],
+    });
+    return rows
+      .map((r) => ({ ...r, created_at: String(r.created_at) }))
+      .filter((r) => {
+        if (data.payment_status && data.payment_status !== "all" && r.payment_status !== data.payment_status) return false;
+        if (data.search) {
+          const s = data.search.toLowerCase();
+          if (
+            !r.full_name.toLowerCase().includes(s) &&
+            !(r.email ?? "").toLowerCase().includes(s) &&
+            !(r.phone ?? "").toLowerCase().includes(s) &&
+            !(r.booking_reference ?? "").toLowerCase().includes(s)
+          ) return false;
+        }
+        return true;
+      });
+  });
+
+export const updateCustomer = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ id: z.string(), full_name: z.string().optional(), email: z.string().nullish(), phone: z.string().nullish(), booking_reference: z.string().nullish(), special_requests: z.string().nullish(), payment_status: z.enum(["paid", "pending", "refunded"]).optional() }))
+  .handler(async ({ data }) => {
+    const { id, ...rest } = data;
+    await db.update(customers).set(rest as any).where(eq(customers.id, id));
+    return { success: true };
+  });
 
 // ── Transfers ────────────────────────────────────────────────────────────────
 

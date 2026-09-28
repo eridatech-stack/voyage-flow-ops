@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { LayoutDashboard, MapPin, Car, Wallet, Settings, Plane, LogOut, KeyRound, Loader2, Route } from "lucide-react";
+import { LayoutDashboard, MapPin, Car, Wallet, Settings, Plane, LogOut, KeyRound, Loader2, Route, Users } from "lucide-react";
 import type { AppUser } from "@/hooks/useAuth";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -22,6 +22,7 @@ const items = [
   { title: "Tours",           url: "/tours",      icon: MapPin },
   { title: "Transfers",       url: "/transfers",  icon: Plane },
   { title: "Trips",           url: "/trips",      icon: Route },
+  { title: "Customers",       url: "/customers",  icon: Users },
   { title: "Fleet & Drivers", url: "/fleet",      icon: Car },
   { title: "Accounting",      url: "/accounting", icon: Wallet },
   { title: "Settings",        url: "/settings",   icon: Settings },
