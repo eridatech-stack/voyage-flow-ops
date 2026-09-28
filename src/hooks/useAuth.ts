@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { serverLogin, serverVerifyToken, serverChangePassword } from "@/server/auth";
+import { serverLogin, serverVerifyToken, serverChangePassword } from "@/fns/auth";
 import { setStoredToken, removeStoredToken, getStoredToken } from "@/lib/auth/jwt";
 
 export interface AppUser {

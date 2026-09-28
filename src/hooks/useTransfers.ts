@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getTransfers, getTransfer, createTransfer, updateTransfer, archiveTransfer } from "@/server/data";
+import { getTransfers, getTransfer, createTransfer, updateTransfer, archiveTransfer } from "@/fns/data";
 
 export type Transfer = Awaited<ReturnType<typeof getTransfers>>[number];
 

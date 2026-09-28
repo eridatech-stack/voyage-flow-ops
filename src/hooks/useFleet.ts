@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getVehicles, createVehicle, updateVehicle, getDrivers, createDriver, updateDriver } from "@/server/data";
+import { getVehicles, createVehicle, updateVehicle, getDrivers, createDriver, updateDriver } from "@/fns/data";
 
 export type Vehicle = Awaited<ReturnType<typeof getVehicles>>[number];
 export type Driver = Awaited<ReturnType<typeof getDrivers>>[number];

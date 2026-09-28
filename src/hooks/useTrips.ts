@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getTrips, getTrip, createTrip, updateTrip, deleteTrip, getTripBookings, addTripBooking, updateTripBooking, generateTripVoucher, removeTripBooking } from "@/server/data";
+import { getTrips, getTrip, createTrip, updateTrip, deleteTrip, getTripBookings, addTripBooking, updateTripBooking, generateTripVoucher, removeTripBooking } from "@/fns/data";
 
 export type Trip = Awaited<ReturnType<typeof getTrips>>[number];
 export type TripBooking = Awaited<ReturnType<typeof getTripBookings>>[number];

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getTourBookings, addTourBooking, updateTourBooking, generateTourVoucher, generateAllTourVouchers, removeTourBooking } from "@/server/tours";
-import { getTransferBookings, addTransferBooking, generateTransferVoucher, generateAllTransferVouchers, removeTransferBooking } from "@/server/data";
+import { getTourBookings, addTourBooking, updateTourBooking, generateTourVoucher, generateAllTourVouchers, removeTourBooking } from "@/fns/tours";
+import { getTransferBookings, addTransferBooking, generateTransferVoucher, generateAllTransferVouchers, removeTransferBooking } from "@/fns/data";
 
 export type TourBooking = Awaited<ReturnType<typeof getTourBookings>>[number];
 export type TransferBooking = Awaited<ReturnType<typeof getTransferBookings>>[number];

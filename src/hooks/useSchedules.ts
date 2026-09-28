@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getScheduledTours, getScheduledTour, createScheduledTour, updateScheduledTour, deleteScheduledTour } from "@/server/tours";
-import { getScheduledTransfers, getScheduledTransfer, createScheduledTransfer, updateScheduledTransfer, getAllSchedules } from "@/server/data";
+import { getScheduledTours, getScheduledTour, createScheduledTour, updateScheduledTour, deleteScheduledTour } from "@/fns/tours";
+import { getScheduledTransfers, getScheduledTransfer, createScheduledTransfer, updateScheduledTransfer, getAllSchedules } from "@/fns/data";
 
 export type ScheduledTour = NonNullable<Awaited<ReturnType<typeof getScheduledTours>>>[number];
 export type ScheduledTransfer = NonNullable<Awaited<ReturnType<typeof getScheduledTransfers>>>[number];

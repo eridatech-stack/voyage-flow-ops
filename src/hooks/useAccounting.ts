@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getAccountingEntries, createAccountingEntry, updateAccountingEntry, getAccountingSummary } from "@/server/data";
+import { getAccountingEntries, createAccountingEntry, updateAccountingEntry, getAccountingSummary } from "@/fns/data";
 
 export type AccountingEntry = Awaited<ReturnType<typeof getAccountingEntries>>[number];
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getSettings, upsertSettings } from "@/server/data";
+import { getSettings, upsertSettings } from "@/fns/data";
 
 export type AgencySettings = NonNullable<Awaited<ReturnType<typeof getSettings>>>;
 

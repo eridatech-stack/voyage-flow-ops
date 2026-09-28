@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getTours, getTour, createTour, updateTour, archiveTour } from "@/server/tours";
+import { getTours, getTour, createTour, updateTour, archiveTour } from "@/fns/tours";
 
 export type Tour = Awaited<ReturnType<typeof getTours>>[number];
 
