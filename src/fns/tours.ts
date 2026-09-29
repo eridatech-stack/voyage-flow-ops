@@ -55,7 +55,7 @@ export const getScheduledTours = createServerFn({ method: "GET" })
       with: { tour: { columns: { name: true, destination: true, duration: true } }, vehicle: { columns: { name: true, plate_number: true } }, driver: { columns: { full_name: true } }, bookings: { columns: { id: true, seat_count: true } } },
       orderBy: [asc(scheduled_tours.service_date)],
     });
-    return rows.map((r) => ({ ...r, service_date: normalizeDate(r.service_date as any) ?? "", departure_time: normalizeTime(r.departure_time as any), created_at: String(r.created_at), booking_count: r.bookings.length, total_seats: r.bookings.reduce((s, b) => s + b.seat_count, 0), bookings: undefined }));
+    return rows.map((r) => ({ ...r, service_date: normalizeDate(r.service_date as any) ?? "", departure_time: normalizeTime(r.departure_time as any), created_at: String(r.created_at), max_capacity: Number(r.max_capacity ?? 0), booking_count: r.bookings.length, total_seats: r.bookings.reduce((s, b) => s + b.seat_count, 0), bookings: undefined }));
   });
 
 export const getScheduledTour = createServerFn({ method: "GET" })
@@ -66,7 +66,7 @@ export const getScheduledTour = createServerFn({ method: "GET" })
       with: { tour: { columns: { name: true, destination: true, duration: true } }, vehicle: { columns: { name: true, plate_number: true } }, driver: { columns: { full_name: true } } },
     });
     if (!row) return null;
-    return { ...row, service_date: normalizeDate(row.service_date as any) ?? "", departure_time: normalizeTime(row.departure_time as any), created_at: String(row.created_at) };
+    return { ...row, service_date: normalizeDate(row.service_date as any) ?? "", departure_time: normalizeTime(row.departure_time as any), created_at: String(row.created_at), max_capacity: Number(row.max_capacity ?? 0) };
   });
 
 export const createScheduledTour = createServerFn({ method: "POST" })

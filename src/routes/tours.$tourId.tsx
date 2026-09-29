@@ -195,7 +195,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
     guide_name: "",
     vehicle_id: "",
     driver_id: "",
-    max_capacity: "16",
+    max_capacity: "",
     status: "confirmed" as "confirmed" | "pending" | "cancelled",
     notes: "",
   });
@@ -223,7 +223,7 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
       notes: form.notes || null,
     });
     setOpen(false);
-    setForm({ service_date: new Date().toISOString().slice(0, 10), departure_time: "09:00", guide_name: "", vehicle_id: "", driver_id: "", max_capacity: "16", status: "confirmed", notes: "" });
+    setForm({ service_date: new Date().toISOString().slice(0, 10), departure_time: "09:00", guide_name: "", vehicle_id: "", driver_id: "", max_capacity: "", status: "confirmed", notes: "" });
   };
 
   const selectedVehicle = vehicles.find((v) => v.id === form.vehicle_id);
