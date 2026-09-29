@@ -22,7 +22,7 @@ import {
   useUpdateTrip, useUpdateTripBooking, type TripBooking,
 } from "@/hooks/useTrips";
 import { useCurrency } from "@/hooks/useCurrency";
-import { useSendEmail } from "@/hooks/useEmail";
+import { useSendEmail, useSendBulkEmail, buildTripReminderEmail } from "@/hooks/useEmail";
 import { useSettings } from "@/hooks/useSettings";
 
 export const Route = createFileRoute("/trips/$tripId")({
@@ -37,6 +37,7 @@ function TripDetail() {
   const [notes, setNotes] = useState<string[]>([]);
   const [newNote, setNewNote] = useState("");
   const [voucherFor, setVoucherFor] = useState<TripBooking | null>(null);
+  const sendBulk = useSendBulkEmail();
   const [emailFor, setEmailFor] = useState<TripBooking | null>(null);
 
   if (isLoading) return <div className="flex items-center justify-center p-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -105,9 +106,29 @@ function TripDetail() {
             <QuickStatusChanger trip={trip} />
             <Button
               variant="outline" size="sm"
-              onClick={() => toast.success(`Confirmation emails queued for ${bookings.length} customers`)}
+              disabled={sendBulk.isPending}
+              onClick={() => {
+                const recipients = bookings
+                  .filter((b) => !!b.customer.email)
+                  .map((b) => ({
+                    to: b.customer.email!,
+                    ...buildTripReminderEmail({
+                      customerName: b.customer.full_name,
+                      tripTitle: trip.title,
+                      tripDate: trip.trip_date,
+                      pickupTime: trip.pickup_time,
+                      pickupLocation: trip.pickup_location,
+                      bookingRef: b.customer.booking_reference,
+                      passengerCount: b.passenger_count,
+                      agencyName: "InTravelSync",
+                    }),
+                  }));
+                if (!recipients.length) { toast.error("No customers have email addresses."); return; }
+                sendBulk.mutate(recipients);
+              }}
             >
-              <Send className="h-3.5 w-3.5" /> Send All
+              {sendBulk.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              Send Reminders ({bookings.filter((b) => !!b.customer.email).length})
             </Button>
             <AddCustomerDrawer tripId={tripId} tripDate={trip.trip_date} />
           </div>

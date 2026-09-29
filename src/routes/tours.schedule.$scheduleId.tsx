@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useScheduledTour } from "@/hooks/useSchedules";
-import { useSendEmail, buildTourConfirmationEmail } from "@/hooks/useEmail";
+import { useSendEmail, useSendBulkEmail, buildTourConfirmationEmail, buildTourReminderEmail } from "@/hooks/useEmail";
 import { useSettings } from "@/hooks/useSettings";
 
 import {
@@ -39,6 +39,7 @@ function TourScheduleDetail() {
   const { data: schedule, isLoading } = useScheduledTour(scheduleId);
   const { data: bookings = [] } = useTourBookings(scheduleId);
   const generateAll = useGenerateAllTourVouchers();
+  const sendBulk = useSendBulkEmail();
   const [notes, setNotes] = useState<string[]>([]);
   const [newNote, setNewNote] = useState("");
   const [voucherFor, setVoucherFor] = useState<TourBooking | null>(null);
@@ -86,9 +87,28 @@ function TourScheduleDetail() {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline" size="sm"
-              onClick={() => toast.success(`Confirmation emails queued for ${bookings.length} customers`)}
+              disabled={sendBulk.isPending}
+              onClick={() => {
+                const recipients = bookings
+                  .filter((b) => !!b.customer.email)
+                  .map((b) => ({
+                    to: b.customer.email!,
+                    ...buildTourReminderEmail({
+                      customerName: b.customer.full_name,
+                      tourName: schedule.tour?.name ?? "Tour",
+                      serviceDate: schedule.service_date,
+                      departureTime: schedule.departure_time,
+                      bookingRef: b.customer.booking_reference,
+                      seatCount: b.seat_count,
+                      agencyName: "InTravelSync",
+                    }),
+                  }));
+                if (!recipients.length) { toast.error("No customers have email addresses."); return; }
+                sendBulk.mutate(recipients);
+              }}
             >
-              <Send className="h-3.5 w-3.5" /> Send All Confirmations
+              {sendBulk.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              Send Reminders ({bookings.filter((b) => !!b.customer.email).length})
             </Button>
             <Button
               variant="outline" size="sm"

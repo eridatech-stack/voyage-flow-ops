@@ -353,6 +353,42 @@ export const getAllSchedules = createServerFn({ method: "GET" }).handler(async (
   ];
 });
 
+
+// ── Bulk email ────────────────────────────────────────────────────────────────
+
+export const sendBulkEmail = createServerFn({ method: "POST" })
+  .inputValidator(z.object({
+    recipients: z.array(z.object({ to: z.string().email(), subject: z.string(), body: z.string() })),
+    resend_api_key: z.string(),
+    from_name: z.string(),
+    reply_to: z.string().nullish(),
+  }))
+  .handler(async ({ data }) => {
+    const results = await Promise.allSettled(
+      data.recipients.map(async (r) => {
+        const htmlBody = r.body
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/\n/g, "<br>");
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${data.resend_api_key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            from: `${data.from_name} <onboarding@resend.dev>`,
+            to: [r.to],
+            subject: r.subject,
+            html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px">${htmlBody}</div>`,
+            reply_to: data.reply_to ?? undefined,
+          }),
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.message ?? "Failed"); }
+        return r.to;
+      })
+    );
+    const sent = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { sent, failed };
+  });
+
 // ── Settings ─────────────────────────────────────────────────────────────────
 
 export const getSettings = createServerFn({ method: "GET" }).handler(async () => {
