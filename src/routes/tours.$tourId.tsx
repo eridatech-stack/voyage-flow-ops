@@ -206,7 +206,8 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
   );
 
   const handleVehicleChange = (vehicleId: string) => {
-    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "" }));
+    const v = vehicles.find((v) => v.id === vehicleId);
+    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "", max_capacity: v ? String(v.capacity) : f.max_capacity }));
   };
 
   const submit = async () => {
@@ -288,9 +289,8 @@ function NewScheduleDrawer({ tourId }: { tourId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <F label="Max Capacity">
               <Input type="number" min={1}
-                value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
+                value={form.max_capacity}
                 onChange={(e) => setForm({ ...form, max_capacity: e.target.value })}
-                placeholder={selectedVehicle ? `Vehicle max: ${selectedVehicle.capacity}` : ""}
               />
             </F>
             <F label="Status">
@@ -343,7 +343,8 @@ function EditScheduleDrawer({ schedule, totalSeats }: { schedule: ScheduledTour;
   );
 
   const handleVehicleChange = (vehicleId: string) => {
-    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "" }));
+    const v = vehicles.find((v) => v.id === vehicleId);
+    setForm((f) => ({ ...f, vehicle_id: vehicleId, driver_id: "", max_capacity: v ? String(v.capacity) : f.max_capacity }));
   };
 
   const submit = async () => {
@@ -434,7 +435,7 @@ function EditScheduleDrawer({ schedule, totalSeats }: { schedule: ScheduledTour;
           <div className="grid grid-cols-2 gap-3">
             <F label="Capacity">
               <Input type="number" min={1}
-                value={selectedVehicle ? String(selectedVehicle.capacity) : form.max_capacity}
+                value={form.max_capacity}
                 onChange={(e) => setForm({ ...form, max_capacity: e.target.value })}
               />
             </F>
