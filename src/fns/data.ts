@@ -41,6 +41,12 @@ export const updateCustomer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { id, ...rest } = data;
     await db.update(customers).set(rest as any).where(eq(customers.id, id));
+    // Sync all accounting entries for this customer when payment_status changes
+    if (rest.payment_status) {
+      await db.update(accounting_entries)
+        .set({ status: rest.payment_status as "paid" | "pending" | "refunded" })
+        .where(eq(accounting_entries.customer_id, id));
+    }
     return { success: true };
   });
 
@@ -235,7 +241,14 @@ export const addTripBooking = createServerFn({ method: "POST" })
 export const updateTripBooking = createServerFn({ method: "POST" })
   .inputValidator(z.object({ bookingId: z.string(), customerId: z.string(), tripId: z.string().optional(), customerUpdate: z.any().optional(), bookingUpdate: z.any().optional() }))
   .handler(async ({ data }) => {
-    if (data.customerUpdate) await db.update(customers).set(data.customerUpdate).where(eq(customers.id, data.customerId));
+    if (data.customerUpdate) {
+      await db.update(customers).set(data.customerUpdate).where(eq(customers.id, data.customerId));
+      if (data.customerUpdate.payment_status) {
+        await db.update(accounting_entries)
+          .set({ status: data.customerUpdate.payment_status as "paid" | "pending" | "refunded" })
+          .where(eq(accounting_entries.booking_id, data.bookingId));
+      }
+    }
     if (data.bookingUpdate) await db.update(trip_bookings).set(data.bookingUpdate).where(eq(trip_bookings.id, data.bookingId));
     return { success: true };
   });

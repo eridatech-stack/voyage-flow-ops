@@ -118,7 +118,15 @@ export const addTourBooking = createServerFn({ method: "POST" })
 export const updateTourBooking = createServerFn({ method: "POST" })
   .inputValidator(z.object({ bookingId: z.string(), customerId: z.string(), scheduledTourId: z.string().optional(), customerUpdate: z.object({ full_name: z.string().optional(), email: z.string().nullish(), phone: z.string().nullish(), booking_reference: z.string().nullish(), special_requests: z.string().nullish(), payment_status: z.enum(["paid", "pending", "refunded"]).optional() }).optional(), bookingUpdate: z.object({ seat_count: z.number().optional(), notes: z.string().nullish(), voucher_status: z.enum(["pending", "generated"]).optional() }).optional() }))
   .handler(async ({ data }) => {
-    if (data.customerUpdate) await db.update(customers).set(data.customerUpdate as any).where(eq(customers.id, data.customerId));
+    if (data.customerUpdate) {
+      await db.update(customers).set(data.customerUpdate as any).where(eq(customers.id, data.customerId));
+      // Sync accounting entry status when payment_status changes
+      if (data.customerUpdate.payment_status) {
+        await db.update(accounting_entries)
+          .set({ status: data.customerUpdate.payment_status as "paid" | "pending" | "refunded" })
+          .where(eq(accounting_entries.booking_id, data.bookingId));
+      }
+    }
     if (data.bookingUpdate) await db.update(tour_bookings).set(data.bookingUpdate as any).where(eq(tour_bookings.id, data.bookingId));
     return { success: true };
   });
