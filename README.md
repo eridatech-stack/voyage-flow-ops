@@ -16,4 +16,12 @@ npm run dev                # http://localhost:8080
 
 Full documentation, conventions, data model, extension recipes and the security/hardening checklist: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## For AI agents and new contributors
+
+- `AGENTS.md` (also imported by `CLAUDE.md`): the rules that cause the most breakage, and which skill to load.
+- `.claude/skills/`: task playbooks (project guide, adding features, database changes, bookings and accounting, troubleshooting, git workflow).
+- `docs/DEVELOPMENT.md`: the full reference.
+
+Keep the docs true: when behaviour changes, update the guide and the relevant skill in the same commit.
+
 Status: runs locally; not production-ready until the authentication gaps in section 11 of the guide are closed.

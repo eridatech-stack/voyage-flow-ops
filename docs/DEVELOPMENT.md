@@ -4,6 +4,8 @@ Operations console for a travel agency: tours, transfers, one-time trips, custom
 
 Last updated: 2026-11-12. Everything below was verified against the code in this repository on that date. Where something is unverified or suspected, it says so.
 
+Companion files: `AGENTS.md` (entry point and rules), `.claude/skills/` (task playbooks that point back to the sections below). If you change behaviour, update this guide and the matching skill together.
+
 Contents
 
 1. Current status
