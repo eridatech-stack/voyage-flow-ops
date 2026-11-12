@@ -41,12 +41,14 @@ export function AppSidebar({ user }: { user: AppUser }) {
     <>
       <Sidebar collapsible="icon" className="border-r-0">
         <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex items-center gap-2 px-2 py-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-amber text-amber-foreground font-bold shrink-0">
+          <div className="flex items-center gap-2 px-2 py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            {/* Collapsed icon rail: the supplied logo is a wide wordmark with no square mark, so keep a compact tile here */}
+            <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber text-sm font-bold text-amber-foreground group-data-[collapsible=icon]:flex">
               iT
             </div>
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="font-display font-semibold text-sidebar-foreground leading-tight">InTravelSync</span>
+            {/* Expanded: full wordmark, light variant for the dark sidebar */}
+            <div className="flex flex-col gap-1 group-data-[collapsible=icon]:hidden">
+              <img src="/InTravelSync-Logo-light.svg" alt="InTravelSync" className="h-8 w-auto" />
               <span className="text-[11px] text-sidebar-foreground/60">Operations Console</span>
             </div>
           </div>

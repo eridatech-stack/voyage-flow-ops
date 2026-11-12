@@ -36,13 +36,9 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber font-display text-xl font-bold text-amber-foreground shadow-lg">
-            iT
-          </div>
-          <div className="text-center">
-            <h1 className="font-display text-2xl font-semibold">InTravelSync</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Operations Console</p>
-          </div>
+          <h1 className="sr-only">InTravelSync</h1>
+          <img src="/InTravelSync-Logo.svg" alt="InTravelSync" className="h-12 w-auto" />
+          <p className="text-sm text-muted-foreground">Operations Console</p>
         </div>
 
         <Card className="p-6">

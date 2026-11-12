@@ -272,6 +272,15 @@ Schema changes: edit `src/db/schema.ts`, then `npm run db:push` (development). `
 - The settings flags `voucher_show_qr`, `voucher_auto_email` and `voucher_signature_line` are stored and editable but are not read anywhere in voucher rendering. Only `voucher_footer` is saved as text. Treat these as unimplemented.
 - Sender address is hardcoded to `onboarding@resend.dev` in `useEmail.ts` and in `sendBulkEmail`. As far as I know Resend's shared testing sender only delivers to the email address on your own Resend account. To email real customers, verify a domain in Resend and change the `from` address in both places (check Resend's current docs).
 
+### 7.7 Logo and branding
+
+- Files: `public/InTravelSync-Logo.svg` (exactly as supplied) and `public/InTravelSync-Logo-light.svg` (the same file with the navy `#14213D` recolored `#FFFFFF`, for the dark sidebar; produce it the same way if the logo changes). Served at `/InTravelSync-Logo.svg` and `/InTravelSync-Logo-light.svg`.
+- Used in: login page, expanded sidebar (light variant), voucher preview dialogs, and the printable voucher HTML. The print window loads the logo from `window.location.origin` and prints in `window.onload` so the image is ready; keep that if you edit the template.
+- The logo is a wide wordmark with no square mark, so the collapsed sidebar rail keeps a small amber "iT" tile. If a square icon is supplied, use it there and as the favicon (none is configured).
+- The navy letters are invisible on dark backgrounds, so use the light variant on anything dark. The app never enables dark mode today.
+- The underline carries a drop-shadow filter inside the SVG. Tools that ignore SVG filters (some converters) will not render it.
+- Emails are plain text and carry no logo. `src/components/ScheduleDetail.tsx` (legacy, section 12) still contains the old tile; it is unused.
+
 ## 8. Authentication
 
 - Login: `serverLogin` checks the bcrypt hash and returns a signed JWT (HS256, 7 day expiry, payload `{ userId, email, fullName }`). The client stores it in localStorage under `vfo_auth_token` and reloads the page.
@@ -365,6 +374,7 @@ Engineering hygiene
 18. No automated tests. The only check used is `npx tsc --noEmit`; run it before every commit.
 19. Uses `drizzle-kit push` instead of versioned migrations; adopt `db:generate` plus migrate for production.
 20. No audit log for who changed what.
+21. A React hydration mismatch warning appears in the browser console on first load (seen on the login page; it also appears on the code from before the logo change). Cause not investigated; likely something that differs between server and client render on first paint.
 
 ## 12. Legacy and dead code
 

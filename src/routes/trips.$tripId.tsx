@@ -521,7 +521,7 @@ function VoucherDialog({ booking, trip, onClose }: {
       </style></head>
       <body>
         <div class="header">
-          <div><div class="logo">InTravelSync</div><div style="font-size:12px;color:#64748B;margin-top:4px">Custom Trip Voucher</div></div>
+          <div><img class="logo" src="${window.location.origin}/InTravelSync-Logo.svg" alt="InTravelSync" style="height:32px;width:auto;display:block"><div style="font-size:12px;color:#64748B;margin-top:4px">Custom Trip Voucher</div></div>
           <div class="badge">TRIP CONFIRMED</div>
         </div>
         <div class="grid">
@@ -537,7 +537,7 @@ function VoucherDialog({ booking, trip, onClose }: {
           <div class="field"><label>Payment</label><span>${booking.customer.payment_status}</span></div>
         </div>
         <div class="footer"><div style="font-size:11px;color:#64748B">Driver Signature</div><div class="sig-line"></div></div>
-        <script>window.print(); window.close();</script>
+        <script>window.onload = function () { window.print(); window.close(); };</script>
       </body></html>
     `);
     win.document.close();
@@ -555,12 +555,9 @@ function VoucherDialog({ booking, trip, onClose }: {
         {booking && (
           <div className="rounded-lg border-2 border-border bg-card p-8">
             <div className="flex items-start justify-between border-b border-border pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-navy font-display font-bold text-white">iT</div>
-                <div>
-                  <div className="font-display text-lg font-bold">InTravelSync</div>
-                  <div className="text-xs text-muted-foreground">Custom Trip Voucher</div>
-                </div>
+              <div className="flex flex-col gap-1">
+                <img src="/InTravelSync-Logo.svg" alt="InTravelSync" className="h-9 w-auto" />
+                <div className="text-xs text-muted-foreground">Custom Trip Voucher</div>
               </div>
               <div className="rounded-full bg-navy/10 px-3 py-1 text-xs font-semibold text-navy">CONFIRMED</div>
             </div>
