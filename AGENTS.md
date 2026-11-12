@@ -31,7 +31,7 @@ Travel agency operations console: tours, transfers, one-time trips, customers, f
 
 ## Security state (read before exposing the app)
 
-Not production-ready. Server functions are unauthenticated, `.env` is tracked in git, and some defaults are hardcoded. Full list: guide section 11. Never paste or commit tokens or passwords; never print the contents of `.env`.
+Not production-ready. Server functions are unauthenticated and some secret defaults are hardcoded in code (`.env` itself is now untracked, but old values remain in git history). Full list: guide section 11. Never paste or commit tokens or passwords; never print the contents of `.env`.
 
 ## Keeping docs true
 

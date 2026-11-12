@@ -35,6 +35,6 @@ If you added route files, commit the regenerated route tree instead of discardin
 - If a token has been supplied for one push: use it only inside that single command, restore the plain remote URL immediately after (`git remote set-url origin https://github.com/eridatech-stack/voyage-flow-ops.git`), never write it to a file or commit, and tell the owner to revoke it. Tokens need only the `repo` scope.
 - Never print `.env` contents, database passwords, `JWT_SECRET` or a Resend key into logs, commits or docs.
 
-## The tracked `.env` problem
+## `.env` handling
 
-`.env` is currently tracked in git (guide 11, item 3). Fix: add `.env` to `.gitignore`, `git rm --cached .env`, rotate the database password and `JWT_SECRET` if the repo was ever shared. Warn the maintainer first: pulling the untracking commit deletes an unmodified local `.env`; they must copy it before pulling and use `.env.example` as the template.
+`.env` is untracked and ignored (since 2026-11-12); `.env.example` is the template. Never stage or print `.env`. Old values remain in git history, so rotate the database password and `JWT_SECRET` if the repo was ever shared. If `.env` disappears after a pull, that is git removing the formerly tracked file: restore it from a copy.
